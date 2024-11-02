@@ -81,7 +81,7 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsLooting => UnitFlags[(int)WowUnitFlag.Looting];
 
-        bool IsMounted => UnitFlags[(int)WowUnitFlag.Mounted];
+        bool IsMounted => UnitFlags[(int)WowUnitFlag.Mounted] || HasBuffById(22718); // Mount `Black War Kodo`
 
         bool IsNoneNpc => NpcFlags[(int)WowUnitNpcFlag.None];
 

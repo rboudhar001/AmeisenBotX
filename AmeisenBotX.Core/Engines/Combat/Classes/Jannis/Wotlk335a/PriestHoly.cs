@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class PriestHoly : BasicCombatClass
     {
-        public PriestHoly(AmeisenBotInterfaces bot) : base(bot)
+        public PriestHoly(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () => TryCastSpell(Priest335a.PowerWordFortitude, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.InnerFire, () => TryCastSpell(Priest335a.InnerFire, 0, true)));
@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if ((Bot.Objects.PartymemberGuids.Any() || Bot.Player.HealthPercentage < 75.0)
+            if ((Bot.Objects.PartyMemberGuids.Any() || Bot.Player.HealthPercentage < 75.0)
                 && NeedToHealSomeone())
             {
                 return;
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 return;
             }
 
-            if ((!Bot.Objects.PartymemberGuids.Any() || Bot.Player.ManaPercentage > 50) && TryFindTarget(TargetProviderDps, out _))
+            if ((!Bot.Objects.PartyMemberGuids.Any() || Bot.Player.ManaPercentage > 50) && TryFindTarget(TargetProviderDps, out _))
             {
                 if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.ShadowWordPain)
                     && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true))
@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
             base.OutOfCombatExecute();
 
             if (NeedToHealSomeone()
-                || HandleDeadPartymembers(Priest335a.Resurrection))
+                || HandleDeadPartyMembers(Priest335a.Resurrection))
             {
                 return;
             }

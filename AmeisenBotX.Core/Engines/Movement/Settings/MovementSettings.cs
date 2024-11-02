@@ -12,8 +12,8 @@
 
         public float SeperationDistance { get; set; } = 2.0f;
 
-        public double WaypointCheckThreshold { get; set; } = 1.7;
+        public float WaypointCheckThreshold { get; set; } = 1.7f;
 
-        public double WaypointCheckThresholdMounted { get; set; } = 3.5;
+        public float WaypointCheckThresholdMounted { get; set; } = 3.5f;
     }
 }

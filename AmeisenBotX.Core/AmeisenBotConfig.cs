@@ -63,6 +63,8 @@ namespace AmeisenBotX.Core
 
         public bool ChatProtocols { get; set; } = false;
 
+        public bool CreatePath { get; set; } = false;
+
         public List<string> CustomCombatClassDependencies { get; set; } = [];
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
@@ -225,6 +227,10 @@ namespace AmeisenBotX.Core
         public bool StayCloseToGroupInCombat { get; set; } = false;
 
         public float SupportRange { get; set; } = 64.0f;
+
+        public int FightUntilHealth { get; set; } = 0;
+
+        public int FightUntilMana { get; set; } = 0;
 
         public bool TrainSpells { get; set; } = false;
 

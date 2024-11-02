@@ -1,4 +1,11 @@
-﻿using AmeisenBotX.BehaviorTree;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
@@ -7,10 +14,11 @@ using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Providers.Basic;
 using AmeisenBotX.Core.Engines.Movement.Providers.Special;
+using AmeisenBotX.Core.Engines.Movement.StaticPath;
+using AmeisenBotX.Core.Engines.Movement.StaticPath.Paths.Dungeons;
 using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Core.Logic.Leafs;
 using AmeisenBotX.Core.Logic.Routines;
-using AmeisenBotX.Core.Logic.StaticDeathRoutes;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Core.Objects;
 using AmeisenBotX.Core.Objects.Enums;
@@ -20,19 +28,12 @@ using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Shared.Lua;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace AmeisenBotX.Core.Logic
 {
     public class AmeisenBotLogic : IAmeisenBotLogic
     {
-        private readonly List<IStaticDeathRoute> StaticDeathRoutes =
+        private readonly List<StaticPath> StaticPaths =
         [
             new ForgeOfSoulsDeathRoute(),
             new PitOfSaronDeathRoute()
@@ -49,14 +50,15 @@ namespace AmeisenBotX.Core.Logic
 
             Mode = BotMode.None;
 
-            AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
+            AntiAfkEvent = new(TimeSpan.FromMilliseconds(1500));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
             EatBlockEvent = new(TimeSpan.FromMilliseconds(30000));
             EatEvent = new(TimeSpan.FromMilliseconds(250));
             IdleActionEvent = new(TimeSpan.FromMilliseconds(1000));
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
             LootTryEvent = new(TimeSpan.FromMilliseconds(750));
-            PartymembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
+            NeedToFightEvent = new(TimeSpan.FromMilliseconds(250));
+            PartyMembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
             UnitsLootedCleanupEvent = new(TimeSpan.FromMilliseconds(1000));
             UpdateFood = new(TimeSpan.FromMilliseconds(1000));
@@ -70,25 +72,25 @@ namespace AmeisenBotX.Core.Logic
                 {
                     new DungeonMovementProvider(bot),
                     new SimpleCombatMovementProvider(bot),
-                    new FollowMovementProvider(bot, config),
+                    new FollowMovementProvider(bot, config)
                 }
             );
 
             // OPEN WORLD -----------------------------
 
-            INode openworldGhostNode = new Selector
+            INode openWorldGhostNode = new Selector
             (
-                () => CanUseStaticPaths(),
+                CanUseStaticPaths,
                 // prefer static paths
-                new SuccessLeaf(() => Bot.Movement.DirectMove(StaticRoute.GetNextPoint(Bot.Player.Position))),
+                new Leaf(RunToCorpseWithStaticPath),
                 // run to corpse by position
-                new Leaf(RunToCorpseAndRetrieveIt)
+                new Leaf(RunToCorpse)
             );
 
             INode combatNode = new Selector
             (
                 () => Bot.CombatClass == null,
-                // start autoattacking if we have no combat class loaded
+                // start auto-attacking if we have no combat class loaded
                 new Selector
                 (
                     () => Bot.Target == null,
@@ -122,7 +124,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 new SuccessLeaf(() => Bot.Jobs.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (() => Bot.Player.IsGhost, openWorldGhostNode),
                 (() => !Bot.Player.IsMounted && NeedToFight(), combatNode),
                 (NeedToRepairOrSell, interactWithMerchantNode),
                 // (NeedToLoot, new Leaf(LootNearUnits)),
@@ -133,7 +135,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 new SuccessLeaf(() => Bot.Grinding.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (() => Bot.Player.IsGhost, openWorldGhostNode),
                 (NeedToFight, combatNode),
                 (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToTrainSpells, interactWithClassTrainerNode),
@@ -146,7 +148,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 new SuccessLeaf(() => Bot.Quest.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (() => Bot.Player.IsGhost, openWorldGhostNode),
                 (NeedToFight, combatNode),
                 (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
@@ -157,7 +159,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 new SuccessLeaf(() => Bot.Pvp.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (() => Bot.Player.IsGhost, openWorldGhostNode),
                 (NeedToFight, combatNode),
                 (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
@@ -168,16 +170,16 @@ namespace AmeisenBotX.Core.Logic
             (
                 new SuccessLeaf(() => Bot.Test.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (() => Bot.Player.IsGhost, openworldGhostNode)
+                (() => Bot.Player.IsGhost, openWorldGhostNode)
             );
 
-            INode openworldNode = new Waterfall
+            INode openWorldNode = new Waterfall
             (
                 // do idle stuff as fallback
                 new SuccessLeaf(() => Bot.CombatClass?.OutOfCombatExecute()),
                 // handle main open world states
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (() => Bot.Player.IsGhost, openWorldGhostNode),
                 (NeedToFight, combatNode),
                 (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
@@ -190,14 +192,13 @@ namespace AmeisenBotX.Core.Logic
 
             INode battlegroundNode = new Waterfall
             (
-                new SuccessLeaf(() => { Bot.Battleground.Execute(); }),
+                new SuccessLeaf(() => { Bot.Battleground?.Execute(); }),
                 // leave battleground once it is finished
-                (IsBattlegroundFinished, new SuccessLeaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); })),
-                // only handle dead state here, ghost should only be a problem on AV as the
-                // graveyard might get lost while we are a ghost
+                (IsBattlegroundFinished, new SuccessLeaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground?.Reset(); })),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (NeedToFight, combatNode),
-                (NeedToEat, new Leaf(Eat))
+                (NeedToSaveMyself, new Leaf(SaveMySelf)),
+                (NeedToEat, new Leaf(Eat)),
+                (NeedToFight, combatNode)
             );
 
             INode dungeonNode = new Waterfall
@@ -206,7 +207,7 @@ namespace AmeisenBotX.Core.Logic
                 (
                     () => Config.DungeonUsePartyMode,
                     // just follow when we use party mode in dungeon
-                    openworldNode,
+                    openWorldNode,
                     new SuccessLeaf(() => Bot.Dungeon.Execute())
                 ),
                 (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
@@ -262,9 +263,11 @@ namespace AmeisenBotX.Core.Logic
                         new Waterfall
                         (
                             // open world auto behavior as fallback
-                            openworldNode,
+                            openWorldNode,
+                            // create a path
+                            (NeedToCreatePath, new Leaf(CreatePath)),
                             // handle movement
-                            (MovementManager.NeedToMove, new Leaf(Move)),
+                            //(MovementManager.NeedToMove, new Leaf(Move)),
                             // handle special environments
                             (() => Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
                             (() => Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
@@ -280,7 +283,7 @@ namespace AmeisenBotX.Core.Logic
                     // we are most likely in the loading screen or player/objects are null
                     new SuccessLeaf(() =>
                     {
-                        // make sure we dont run after we leave the loadingscreen
+                        // make sure we dont run after we leave the loading screen
                         Bot.Movement.StopMovement();
                     })
                 )
@@ -290,7 +293,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 new Waterfall
                 (
-                    // run the anti afk and main logic if wow is running and we are logged in
+                    // run the anti afk and main logic if wow is running, and we are logged in
                     new Annotator
                     (
                         new SuccessLeaf(AntiAfk),
@@ -313,13 +316,21 @@ namespace AmeisenBotX.Core.Logic
             );
         }
 
+        // Create a path
+        // ----------
+        private static readonly int DurationInSeconds = 60 * 5;
+        private static Vector3[] PathCreated = new Vector3[DurationInSeconds];
+        private static int Index = 0;
+        private static bool ResetCreatePath = false;
+        // ----------
+
         public event Action OnWoWStarted;
 
         public BotMode Mode { get; private set; }
 
         private TimegatedEvent AntiAfkEvent { get; }
 
-        private bool ArePartymembersInFight { get; set; }
+        private bool ArePartyMembersInFight { get; set; }
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -351,11 +362,15 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent LootTryEvent { get; }
 
+        private TimegatedEvent NeedToFightEvent { get; }
+
+        private bool Fighting { get; set; } = false;
+
         private IWowUnit Merchant { get; set; }
 
         private MovementManager MovementManager { get; }
 
-        private TimegatedEvent PartymembersFightEvent { get; }
+        private TimegatedEvent PartyMembersFightEvent { get; }
 
         private IWowUnit ProfessionTrainer { get; set; }
 
@@ -367,7 +382,7 @@ namespace AmeisenBotX.Core.Logic
 
         private bool SearchedStaticRoutes { get; set; }
 
-        private IStaticDeathRoute StaticRoute { get; set; }
+        private IStaticPath StaticPath { get; set; }
 
         private Tree Tree { get; }
 
@@ -378,6 +393,8 @@ namespace AmeisenBotX.Core.Logic
         private Queue<ulong> UnitsToLoot { get; }
 
         private TimegatedEvent UpdateFood { get; }
+
+        private bool SavingMyself { get; set; } = false;
 
         public static NpcSubType DecideClassTrainer(WowClass wowClass)
         {
@@ -427,41 +444,32 @@ namespace AmeisenBotX.Core.Logic
         }
 
         /// <summary>
-        /// This method searches for static death routes, this is needed when pathfinding cannot
-        /// find a good route from the graveyard to th dungeon entry. For example the ICC dungeons
-        /// are only reachable by flying, its easier to use static routes.
+        /// This method searches for static paths, this is needed when pathfinding cannot
+        /// find a good route from A to B.For example the ICC dungeons
+        /// are only reachable by flying, it's easier to use static paths.
         /// </summary>
         /// <returns>True when a static path can be used, false if not</returns>
         private bool CanUseStaticPaths()
         {
-            if (!SearchedStaticRoutes)
+            // already found a path, deleted when body is retrieved.
+            if (StaticPath != null) return true;
+
+            // UniversalDungeonEngine will set the dungeon profile when the player enters the dungeon,
+            // and will only overwrite it if the player enters another dungeon, it never deletes the profile.
+
+            if (Bot.Dungeon.Profile != null)
             {
-                if (Bot.Memory.Read(Bot.Memory.Offsets.CorpsePosition, out Vector3 corpsePosition))
-                {
-                    SearchedStaticRoutes = true;
+                StaticPath staticPath = StaticPaths.FirstOrDefault(e => e.IsUsable(Bot.Objects.MapId));
 
-                    Vector3 endPosition = Bot.Dungeon.Profile != null ? Bot.Dungeon.Profile.WorldEntry : corpsePosition;
-                    IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(Bot.Objects.MapId, Bot.Player.Position, endPosition));
+                // no static path found
+                if (staticPath == null) return false;
 
-                    if (staticRoute != null)
-                    {
-                        StaticRoute = staticRoute;
-                        StaticRoute.Init(Bot.Player.Position);
-                    }
-                    else
-                    {
-                        staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(Bot.Objects.MapId, Bot.Player.Position, corpsePosition));
+                StaticPath = staticPath;
 
-                        if (staticRoute != null)
-                        {
-                            StaticRoute = staticRoute;
-                            StaticRoute.Init(Bot.Player.Position);
-                        }
-                    }
-                }
+                return true;
             }
 
-            return StaticRoute != null;
+            return false;
         }
 
         private BtStatus ChangeRealmlist()
@@ -599,15 +607,16 @@ namespace AmeisenBotX.Core.Logic
             if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
             {
                 Bot.Wow.RepopMe();
-                return BtStatus.Success;
+                Bot.Movement.StopMovement();
+                return BtStatus.Ongoing;
             }
 
-            return BtStatus.Ongoing;
+            return BtStatus.Success;
         }
 
         private BtStatus DeadDungeon()
         {
-            if (!ArePartymembersInFight)
+            if (!ArePartyMembersInFight)
             {
                 if (DungeonDiedTimestamp == default)
                 {
@@ -621,8 +630,8 @@ namespace AmeisenBotX.Core.Logic
                 }
             }
 
-            if ((!ArePartymembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30))
-                || Bot.Objects.Partymembers.Any(e => !e.IsDead
+            if ((!ArePartyMembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30))
+                || Bot.Objects.PartyMembers.Any(e => !e.IsDead
                     && (e.Class == WowClass.Paladin || e.Class == WowClass.Druid || e.Class == WowClass.Priest || e.Class == WowClass.Shaman)))
             {
                 // if we died 30s ago or no one that can ress us is alive
@@ -634,70 +643,69 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Ongoing;
         }
 
+        private BtStatus SaveMySelf()
+        {
+            // TODO: I am in a battleground, move to nearest `OwnGraveyardPosition` until I leave combat to eat/drink
+            if (Bot.Objects.MapId.IsBattlegroundMap() && !SavingMyself)
+            {
+                Bot.Wow.StopCasting();
+                Bot.Movement.StopMovement();
+                SavingMyself = Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Battleground.Profile.EnemyGraveyardPosition);
+
+                return SavingMyself ? BtStatus.Success : BtStatus.Failed;
+            }
+
+            return BtStatus.Success;
+        }
+
         private BtStatus Eat()
         {
+            if (Bot.Movement.RouteInProgress())
+            {
+                Bot.Movement.StopMovement();
+                return BtStatus.Ongoing;
+            }
+
             if (EatEvent.Run())
             {
-                bool needToEat = Bot.Player.HealthPercentage < Config.EatUntilPercent;
-                bool needToDrink = Bot.Player.ManaPercentage < Config.DrinkUntilPercent;
-
                 bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
                 bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
 
-                if (isEating && isDrinking)
+                if (isEating || isDrinking)
                 {
                     return BtStatus.Ongoing;
                 }
 
-                IWowInventoryItem refreshment = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
+                bool needToEat = Bot.Player.HealthPercentage < Config.EatStartPercent;
+                bool needToDrink = Bot.Player.ManaPercentage < Config.DrinkStartPercent;
 
-                if (needToEat && needToDrink && refreshment != null)
+                /*
+                IWowInventoryItem refreshment = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
+                if ((needToEat || needToDrink) && refreshment != null)
                 {
-                    if (refreshment != null)
-                    {
-                        Bot.Wow.UseItemByName(refreshment.Name);
-                        return BtStatus.Ongoing;
-                    }
+                    Bot.Wow.UseItemByName(refreshment.Name);
+                    return BtStatus.Ongoing;
+                }
+                */
+
+                IWowInventoryItem water = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowWater), e.Id));
+                if (needToDrink && water != null)
+                {
+                    Bot.Wow.UseItemByName(water.Name);
+                    return BtStatus.Success;
                 }
 
                 IWowInventoryItem food = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowFood), e.Id));
-
-                if (!isEating && needToEat && (food != null || refreshment != null))
+                if (needToEat && food != null)
                 {
-                    // only use food if its not very lowlevel, otherwise try to use a refreshment
-                    if (food != null && (refreshment == null || food.RequiredLevel >= Bot.Player.Level - 5))
-                    {
-                        Bot.Wow.UseItemByName(food.Name);
-                        return BtStatus.Ongoing;
-                    }
-
-                    if (refreshment != null)
-                    {
-                        Bot.Wow.UseItemByName(refreshment.Name);
-                        return BtStatus.Ongoing;
-                    }
+                    Bot.Wow.UseItemByName(food.Name);
+                    return BtStatus.Success;
                 }
 
-                IWowInventoryItem water = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowWater), e.Id));
-
-                if (!isDrinking && needToDrink && (water != null || refreshment != null))
-                {
-                    // only use water if its not very lowlevel, otherwise try to use a refreshment
-                    if (water != null && (refreshment == null || water.RequiredLevel >= Bot.Player.Level - 5))
-                    {
-                        Bot.Wow.UseItemByName(water.Name);
-                        return BtStatus.Ongoing;
-                    }
-
-                    if (refreshment != null)
-                    {
-                        Bot.Wow.UseItemByName(refreshment.Name);
-                        return BtStatus.Ongoing;
-                    }
-                }
+                return BtStatus.Failed;
             }
 
-            return BtStatus.Success;
+            return BtStatus.Ongoing;
         }
 
         private IEnumerable<IWowUnit> GetLootableUnits()
@@ -815,6 +823,36 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Ongoing;
         }
 
+        private bool NeedToCreatePath()
+        {
+            if (Config.CreatePath)
+            {
+                ResetCreatePath = true;
+
+                return true;
+            }
+
+            if (ResetCreatePath)
+            {
+                ResetCreatePath = false;
+                PathCreated = new Vector3[DurationInSeconds];
+                Index = 0;
+            }
+
+            return false;
+        }
+
+        private BtStatus CreatePath()
+        {
+            if (Index < 300)
+            {
+                // Save the  new player position every 1s in the array
+                PathCreated[Index] = Bot.Player.Position;
+                Index++;
+            }
+            return BtStatus.Ongoing;
+        }
+
         private BtStatus Move()
         {
             return MoveToPosition(MovementManager.Target);
@@ -831,28 +869,52 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
+        private bool NeedToSaveMyself()
+        {
+            bool needToSaveMyself = Bot.Player.IsInCombat && (Bot.Player.HealthPercentage < Config.FightUntilHealth || Bot.Player.ManaPercentage < Config.FightUntilMana);
+
+            // I don't need to save myself, but I am saving myself
+            if (!needToSaveMyself && SavingMyself)
+            {
+                Bot.Movement.StopMovement();
+                SavingMyself = false;
+                return false;
+            }
+
+            // I need to save myself, and I am already saving myself
+            if (needToSaveMyself && SavingMyself)
+            {
+                return false;
+            }
+
+            return needToSaveMyself;
+        }
+
         private bool NeedToEat()
         {
+            if (Bot.Player.IsInCombat) return false;
+
             // is eating blocked, used to prevent shredding of food
+            /*
             if (!EatBlockEvent.Ready)
             {
                 return false;
             }
 
-            // when we are in a group an they move too far away, abort eating and dont start eating
-            // for 30s
-            if (Config.EatDrinkAbortFollowParty && Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > Config.EatDrinkAbortFollowPartyDistance)
+            // when we are in a group an they move too far away, abort eating and dont start eating for 30s
+            if (Config.EatDrinkAbortFollowParty && Bot.Objects.RaidMemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > Config.EatDrinkAbortFollowPartyDistance)
             {
                 EatBlockEvent.Run();
                 return false;
             }
+            */
 
             bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
             bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
 
             // still eating/drinking, wait until threshold is reached
             if ((isEating && Bot.Player.HealthPercentage < Config.EatUntilPercent)
-                || (isDrinking && Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent))
+                || (isDrinking && Bot.Player.ManaPercentage < Config.DrinkUntilPercent))
             {
                 return true;
             }
@@ -864,27 +926,73 @@ namespace AmeisenBotX.Core.Logic
                     .OrderByDescending(e => e.ItemLevel);
             }
 
-            return Bot.Player.HealthPercentage < Config.EatUntilPercent
-                   && (Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id))
-                       || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)))
-                || Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
-                   && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id))
-                       || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)));
+            return (Bot.Player.ManaPercentage < Config.DrinkStartPercent && Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id))
+                || (Bot.Player.HealthPercentage < Config.EatStartPercent && Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id))));
         }
 
         private bool NeedToFight()
         {
-            if (PartymembersFightEvent.Run())
+            // check every 0.25s
+            if (NeedToFightEvent.Run())
             {
-                ArePartymembersInFight = Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                    || Bot.Objects.All.OfType<IWowUnit>().Any(e => e.IsInCombat
-                        && (e.IsTaggedByMe || !e.IsTaggedByOther)
-                        && (e.TargetGuid == Bot.Player.Guid || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
-                        && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
+
+                if (Bot.CombatClass?.Role == WowRole.Heal
+                    && NeedToHeal())
+                {
+                    Fighting = true;
+                }
+                /*
+                else if (NeedToFightWithPlayer())
+                {
+                    Fighting = true;
+                }
+                */
+                /*
+                else if (NeedToFightWithMobs())
+                {
+                    Fighting = true;
+                }
+                */
+                else
+                {
+                    Fighting = false;
+                }
             }
 
-            return Bot.Player.IsInCombat
-                || ArePartymembersInFight;
+            return Fighting;
+        }
+
+        private bool NeedToHeal()
+        {
+            return Bot.Objects.PartyMembers.Any(e =>
+                !e.IsDead
+                && e.MaxHealth - e.Health > 1200
+                && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange);
+        }
+
+        private bool NeedToFightWithPlayer()
+        {
+            return Bot.Objects.All.OfType<IWowUnit>().Any(e =>
+                e.IsPlayer()
+                && !e.IsDead
+                && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange
+                && Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Hostile);
+        }
+
+        private bool NeedToFightWithMobs()
+        {
+            if (Bot.Objects.MapId.IsBattlegroundMap()) { return false; }
+
+            if (PartyMembersFightEvent.Run())
+            {
+                ArePartyMembersInFight = Bot.Objects.PartyMembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
+                    || Bot.Objects.All.OfType<IWowUnit>().Any(e => e.IsInCombat
+                        && (e.IsTaggedByMe || !e.IsTaggedByOther)
+                        && (e.TargetGuid == Bot.Player.Guid || Bot.Objects.PartyMembers.Any(x => x.Guid == e.TargetGuid))
+                        && Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Hostile);
+            }
+
+            return Bot.Player.IsInCombat || ArePartyMembersInFight;
         }
 
         private bool NeedToFollowTactic()
@@ -1004,13 +1112,13 @@ namespace AmeisenBotX.Core.Logic
         {
             if (Config.AutoTalkToNearQuestgivers)
             {
-                if (Bot.Objects.Partymembers.Any())
+                if (Bot.Objects.PartyMembers.Any())
                 {
                     List<ulong> guids = [];
 
-                    if (Bot.Objects.Partyleader != null && Bot.Player.DistanceTo(Bot.Objects.Partyleader) < 6.0f)
+                    if (Bot.Objects.PartyLeader != null && Bot.Player.DistanceTo(Bot.Objects.PartyLeader) < 6.0f)
                     {
-                        guids.Add(Bot.Objects.Partyleader.TargetGuid);
+                        guids.Add(Bot.Objects.PartyLeader.TargetGuid);
                     }
 
                     foreach (ulong guid in guids)
@@ -1090,7 +1198,27 @@ namespace AmeisenBotX.Core.Logic
             return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
         }
 
-        private BtStatus RunToCorpseAndRetrieveIt()
+        private BtStatus RunToCorpseWithStaticPath()
+        {
+            if (Bot.Movement.RouteInProgress())
+            {
+                return BtStatus.Success;
+            }
+
+            // get sub-path from static path where the start point is the nearest position to player position
+            List<Vector3> pathToRun = StaticPath.GetPathFromWhereToStart(Bot.Player.Position);
+
+            float distanceToStart = Bot.Player.Position.GetDistance(pathToRun.First());
+
+            // If position from where the path start is more than 60m away, try to go there with Pathfinder
+            bool onMyWay = distanceToStart > 60
+                ? Bot.Movement.SetMovementAction(MovementAction.Move, pathToRun.First())
+                : Bot.Movement.SetMovementFromPath(pathToRun);
+
+            return onMyWay ? BtStatus.Success : BtStatus.Failed;
+        }
+
+        private BtStatus RunToCorpse()
         {
             if (!Bot.Memory.Read(Bot.Memory.Offsets.CorpsePosition, out Vector3 corpsePosition))
             {
@@ -1099,6 +1227,11 @@ namespace AmeisenBotX.Core.Logic
 
             if (Bot.Player.Position.GetDistance(corpsePosition) > Config.GhostResurrectThreshold)
             {
+                if (Bot.Movement.RouteInProgress())
+                {
+                    return BtStatus.Success;
+                }
+
                 Bot.Movement.SetMovementAction(MovementAction.Move, corpsePosition);
                 return BtStatus.Ongoing;
             }

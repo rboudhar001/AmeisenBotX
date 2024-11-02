@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class HunterBeastmastery : BasicCombatClass
     {
-        public HunterBeastmastery(AmeisenBotInterfaces bot) : base(bot)
+        public HunterBeastmastery(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             PetManager = new
             (

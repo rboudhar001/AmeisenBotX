@@ -13,13 +13,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
 {
     public class TargetManager : ITargetProvider
     {
-        public TargetManager(AmeisenBotInterfaces bot, WowRole role, TimeSpan minTargetSwitchTime)
+        public TargetManager(AmeisenBotInterfaces bot, AmeisenBotConfig config, WowRole role, TimeSpan minTargetSwitchTime)
         {
             TargetSelectionLogic = role switch
             {
-                WowRole.Dps => new SimpleDpsTargetSelectionLogic(bot),
-                WowRole.Tank => new SimpleTankTargetSelectionLogic(bot),
-                WowRole.Heal => new SimpleHealTargetSelectionLogic(bot),
+                WowRole.Dps => new SimpleDpsTargetSelectionLogic(bot, config),
+                WowRole.Tank => new SimpleTankTargetSelectionLogic(bot, config),
+                WowRole.Heal => new SimpleHealTargetSelectionLogic(bot, config),
                 _ => throw new NotImplementedException(),
             };
 

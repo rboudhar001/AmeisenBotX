@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
     public class MageFrost : TemplateCombatClass
     {
-        public MageFrost(AmeisenBotInterfaces bot) : base(bot)
+        public MageFrost(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.ArcaneIntellect, () => TryCastSpell(Mage335a.ArcaneIntellect, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.FrostArmor, () => TryCastSpell(Mage335a.FrostArmor, 0, true)));

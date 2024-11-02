@@ -65,7 +65,7 @@ namespace AmeisenBotX.Wow
         /// <summary>
         /// Shortcut to get the current partyleaders guid.
         /// </summary>
-        ulong PartyleaderGuid => ObjectProvider.Partyleader != null ? ObjectProvider.Partyleader.Guid : 0ul;
+        ulong PartyleaderGuid => ObjectProvider.PartyLeader != null ? ObjectProvider.PartyLeader.Guid : 0ul;
 
         /// <summary>
         /// Shortcut to get the current pets guid.
@@ -220,6 +220,8 @@ namespace AmeisenBotX.Wow
         bool IsRuneReady(int id);
 
         void LeaveBattleground();
+
+        double GetBattlefieldTimeRunning();
 
         void LootEverything();
 

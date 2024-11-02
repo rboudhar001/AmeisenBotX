@@ -2,6 +2,7 @@
 {
     public enum WowWater
     {
+        ConjuredCrystalWater = 8079,
         RefreshingSpringWater = 159,
         MelonJuice = 1205,
         MoonberryJuice = 1645,

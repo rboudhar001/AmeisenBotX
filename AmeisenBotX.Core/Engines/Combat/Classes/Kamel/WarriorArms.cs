@@ -57,9 +57,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
 
-        public WarriorArms(AmeisenBotInterfaces bot) : base()
+        public WarriorArms(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
             //Stances
             spellCoolDown.Add(defensiveStanceSpell, DateTime.Now);
             spellCoolDown.Add(battleStanceSpell, DateTime.Now);

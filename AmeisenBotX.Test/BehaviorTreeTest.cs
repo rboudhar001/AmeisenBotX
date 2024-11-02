@@ -3,6 +3,8 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Interfaces;
 using AmeisenBotX.BehaviorTree.Objects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using AmeisenBotX.Core.Engines.Battleground.Jannis;
+using System;
 
 namespace AmeisenBotX.Test
 {
@@ -17,7 +19,7 @@ namespace AmeisenBotX.Test
             int treeResult01 = 0;
             int treeResult11 = 0;
 
-            TestBlackboard testBlackboard = new();
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo);
 
             BehaviorTree<TestBlackboard> tree = new
             (
@@ -107,7 +109,7 @@ namespace AmeisenBotX.Test
             int treeResult0 = 0;
             int treeResult1 = 0;
 
-            TestBlackboard testBlackboard = new()
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo)
             {
                 FirstNode = true
             };
@@ -158,7 +160,7 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult01 = 0;
 
-            TestBlackboard testBlackboard = new()
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo)
             {
                 FirstNode = true,
                 SecondFirstNode = true
@@ -231,7 +233,7 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new();
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo);
 
             BehaviorTree<TestBlackboard> tree = new
             (
@@ -329,7 +331,7 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new();
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo);
 
             BehaviorTree<TestBlackboard> tree = new
             (
@@ -447,7 +449,7 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new();
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo);
 
             BehaviorTree<TestBlackboard> tree = new
             (
@@ -520,7 +522,7 @@ namespace AmeisenBotX.Test
             int treeResult0 = 0;
             int treeResult1 = 0;
 
-            TestBlackboard testBlackboard = new()
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo)
             {
                 FirstNode = true
             };
@@ -571,7 +573,7 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new() { };
+            TestBlackboard testBlackboard = new(UpdateBattlegroundInfo) { };
 
             BehaviorTree<TestBlackboard> tree = new
             (
@@ -637,14 +639,27 @@ namespace AmeisenBotX.Test
             Assert.AreEqual(1, treeResult1);
             Assert.AreEqual(2, treeResult2);
         }
+
+        public void UpdateBattlegroundInfo()
+        {
+            // test something...
+        }
     }
 
-    public class TestBlackboard : IBlackboard
+    public class TestBlackboard : Blackboard
     {
+        public override int EnemyTeamMaxScore { get; set; }
+
+        public override int EnemyTeamScore { get; set; }
+
+        public override int MyTeamMaxScore { get; set; }
+
+        public override int MyTeamScore { get; set; }
+
         public bool FirstNode;
         public bool SecondFirstNode;
 
-        public void Update()
+        public TestBlackboard(Action updateAction) : base(updateAction)
         {
         }
     }

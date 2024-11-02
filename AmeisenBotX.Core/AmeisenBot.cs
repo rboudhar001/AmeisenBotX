@@ -514,7 +514,7 @@ namespace AmeisenBotX.Core
             // add battleground engines here
             BattlegroundEngines = new List<IBattlegroundEngine>()
             {
-                new UniversalBattlegroundEngine(Bot),
+                new UniversalBattlegroundEngine(Bot, Config),
                 new ArathiBasin(Bot),
                 new StrandOfTheAncients(Bot),
                 new EyeOfTheStorm(Bot),
@@ -532,8 +532,8 @@ namespace AmeisenBotX.Core
                          && x.Namespace != null
                          && x.Namespace.Contains(combatClassNamespace));
 
-            CombatClasses = combatClassTypes.Where(x => !x.IsAbstract && x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
-                .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot));
+            CombatClasses = combatClassTypes.Where(x => !x.IsAbstract && x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces), typeof(AmeisenBotConfig) }) != null)
+                .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot, Config));
         }
 
         private void InitGrindingProfiles()
@@ -633,7 +633,7 @@ namespace AmeisenBotX.Core
                 Bot.Character.Inventory.Update();
                 Bot.Character.Equipment.Update();
 
-                Bot.Character.UpdateGear();
+                //Bot.Character.UpdateGear();
                 Bot.Character.UpdateBags();
 
                 Bot.Character.Inventory.Update();

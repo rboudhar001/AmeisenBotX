@@ -201,8 +201,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
                                      + Seperate(seperationDistance, maxVelocity, 0.05f),
 
                 MovementAction.Follow => Seek(targetPosition, maxSteering, maxVelocity, 0.9f)
-                                       + AvoidObstacles(maxSteering, maxVelocity, 0.05f)
-                                       + Seperate(seperationDistance, maxVelocity, 0.05f),
+                                       + AvoidObstacles(maxSteering, maxVelocity, 0.05f),
+                                       //+ Seperate(seperationDistance, maxVelocity, 0.05f),
 
                 MovementAction.Chase => Seek(targetPosition, maxSteering, maxVelocity, 1.0f),
                 MovementAction.Flee => Flee(targetPosition, maxSteering, maxVelocity, 1.0f).ZeroZ(),

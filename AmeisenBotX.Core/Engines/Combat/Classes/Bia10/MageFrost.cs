@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public class MageFrost : BasicCombatClassBia10
     {
-        public MageFrost(AmeisenBotInterfaces bot) : base(bot)
+        public MageFrost(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.FrostArmor, () =>
                 Bot.Player.ManaPercentage > 20.0

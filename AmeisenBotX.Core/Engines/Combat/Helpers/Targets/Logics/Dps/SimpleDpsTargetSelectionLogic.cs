@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Dps
 {
     public class SimpleDpsTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public SimpleDpsTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
+        public SimpleDpsTargetSelectionLogic(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             TargetValidator.Add(new IsAttackableTargetValidator(bot));
             TargetValidator.Add(new IsInCombatTargetValidator());

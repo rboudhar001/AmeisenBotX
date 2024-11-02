@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
 {
     public class SimpleTankTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public SimpleTankTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
+        public SimpleTankTargetSelectionLogic(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             TargetValidator.Add(new IsAttackableTargetValidator(bot));
             TargetValidator.Add(new IsInCombatTargetValidator());
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
             IEnumerable<IWowUnit> targetsINeedToTank = unitsAroundMe
                 .Where(e => e.Type != WowObjectType.Player
                          && e.TargetGuid != Bot.Wow.PlayerGuid
-                         && Bot.Objects.PartymemberGuids.Contains(e.TargetGuid));
+                         && Bot.Objects.PartyMemberGuids.Contains(e.TargetGuid));
 
             if (targetsINeedToTank.Any())
             {
@@ -47,11 +47,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
             }
             else
             {
-                if (Bot.Objects.Partymembers.Any())
+                if (Bot.Objects.PartyMembers.Any())
                 {
                     Dictionary<IWowUnit, int> targets = [];
 
-                    foreach (IWowUnit unit in Bot.Objects.Partymembers)
+                    foreach (IWowUnit unit in Bot.Objects.PartyMembers)
                     {
                         if (Bot.TryGetWowObjectByGuid<IWowUnit>(unit.TargetGuid, out IWowUnit targetUnit)
                             && targetUnit != null

@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
         {
             if (SpellsToKeepActiveOnParty?.Count > 0)
             {
-                foreach (IWowUnit wowUnit in Bot.Objects.Partymembers.Where(e => e.Guid != Bot.Wow.PlayerGuid && !e.IsDead))
+                foreach (IWowUnit wowUnit in Bot.Objects.PartyMembers.Where(e => e.Guid != Bot.Wow.PlayerGuid && !e.IsDead))
                 {
                     foreach ((string, CastSpellOnUnit) auraCombo in SpellsToKeepActiveOnParty)
                     {
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
             }
 
             // TODO: recognize bad spells and dispell them if (RemoveBadAurasSpells?.Count > 0) {
-            // foreach (IWowUnit wowUnit in Bot.ObjectManager.Partymembers) { foreach (WowAura
+            // foreach (IWowUnit wowUnit in Bot.ObjectManager.PartyMembers) { foreach (WowAura
             // wowAura in wowUnit.Auras.Where(e => e.IsHarmful)) { foreach (((string, DispelType),
             // CastSpellOnUnit) dispelCombo in RemoveBadAurasSpells) {
             //

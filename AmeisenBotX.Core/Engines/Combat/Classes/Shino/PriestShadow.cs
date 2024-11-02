@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
     public class PriestShadow : TemplateCombatClass
     {
-        public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
+        public PriestShadow(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.Shadowform, () => TryCastSpell(Priest335a.Shadowform, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () => TryCastSpell(Priest335a.PowerWordFortitude, Bot.Wow.PlayerGuid, true)));

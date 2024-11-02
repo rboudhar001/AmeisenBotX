@@ -22,9 +22,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public abstract class BasicCombatClassBia10 : ICombatClass
     {
-        protected BasicCombatClassBia10(AmeisenBotInterfaces bot)
+        protected BasicCombatClassBia10(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
+            Config = config;
 
             SpellAbortFunctions = [];
             ResurrectionTargets = [];
@@ -82,7 +83,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public AuraManager TargetAuraManager { get; private set; }
 
-        public ITargetProvider TargetProviderDps { get; private set; }
+        public ITargetProvider TargetProviderDps { get; set; }
+
+        public ITargetProvider TargetProviderHeal { get; set; }
+
+        public ITargetProvider TargetProviderTank { get; set; }
 
         public abstract bool UseAutoAttacks { get; }
 
@@ -94,6 +99,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         protected AmeisenBotInterfaces Bot { get; }
 
+        protected AmeisenBotConfig Config { get; }
+
         protected DateTime LastSpellCast { get; private set; }
 
         protected List<Func<bool>> SpellAbortFunctions { get; }
@@ -101,6 +108,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         private double GCDTime { get; set; }
 
         private DateTime LastGCD { get; set; }
+
+        public virtual bool TryToTravel()
+        {
+            return false;
+        }
 
         public virtual void AttackTarget()
         {
@@ -350,7 +362,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 return false;
             }
 
-            List<IWowPlayer> groupPlayers = Bot.Objects.Partymembers
+            List<IWowPlayer> groupPlayers = Bot.Objects.PartyMembers
                 .OfType<IWowPlayer>()
                 .Where(e => e.Health == 0)
                 .ToList();
@@ -455,13 +467,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 switch (spell.CastTime)
                 {
                     case 0:
-                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
+                        Bot.Movement.PreventMovement(300);
                         CheckFacing(target);
                         GCD += 0.1; // some timing is off with casting after instant cast spells
                         break;
 
                     case > 0:
-                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        Bot.Movement.PreventMovement(spell.CastTime);
                         CheckFacing(target);
                         break;
                 }
@@ -481,12 +493,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 switch (spell.CastTime)
                 {
                     case 0:
-                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
+                        Bot.Movement.PreventMovement(300);
                         GCD += 0.1; // some timing is off with casting after instant cast spells
                         break;
 
                     case > 0:
-                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        Bot.Movement.PreventMovement(spell.CastTime);
                         break;
                 }
 

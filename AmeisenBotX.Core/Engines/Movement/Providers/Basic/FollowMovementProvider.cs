@@ -23,9 +23,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Providers.Basic
         public bool Get(out Vector3 position, out MovementAction type)
         {
             if (!Bot.Player.IsDead
-                && !Bot.Player.IsInCombat
-                && !Config.Autopilot
-                && !Bot.Player.IsGhost)
+                && !Bot.Player.IsInCombat)
             {
                 if (IsUnitToFollowThere(out IWowUnit player))
                 {
@@ -67,8 +65,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Providers.Basic
                 IWowUnit[] playersToTry =
                 [
                     Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
-                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
-                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
+                    Config.FollowGroupLeader ? Bot.Objects.PartyLeader : null,
+                    Config.FollowGroupMembers ? Bot.Objects.PartyMembers.FirstOrDefault() : null
                 ];
 
                 foreach (IWowUnit unit in playersToTry)

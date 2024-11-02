@@ -1,0 +1,86 @@
+using AmeisenBotX.Common.Math;
+using System.Collections.Generic;
+using AmeisenBotX.Wow.Objects.Enums;
+
+namespace AmeisenBotX.Core.Engines.Movement.StaticPath.Paths.Battlegrounds.AlteracValley
+{
+    public class FromFrostwolfToIcebloodPath : StaticPath
+    {
+        public override WowMapId MapId { get; } = WowMapId.AlteracValley;
+
+        public override List<Vector3> Path { get; } =
+        [
+            new Vector3(-1082.3097f, -349.8183f, 54.299507f),
+            new Vector3(-1077.3253f, -353.46f, 52.22048f),
+            new Vector3(-1071.6475f, -357.61304f, 51.405552f),
+            new Vector3(-1066.3514f, -362.1627f, 51.389183f),
+            new Vector3(-1061.4481f, -367.14984f, 51.437653f),
+            new Vector3(-1053.5801f, -376.98547f, 51.395355f),
+            new Vector3(-1050.6145f, -379.6413f, 51.228638f),
+            new Vector3(-1044.8329f, -383.5565f, 50.94212f),
+            new Vector3(-1038.6255f, -386.77066f, 50.745758f),
+            new Vector3(-1032.2445f, -389.6639f, 50.64482f),
+            new Vector3(-1019.2008f, -394.57748f, 50.68491f),
+            new Vector3(-1012.4377f, -396.52737f, 50.79769f),
+            new Vector3(-1005.6585f, -397.92783f, 50.52124f),
+            new Vector3(-998.68756f, -398.75314f, 50.220837f),
+            new Vector3(-991.65405f, -399.07547f, 50.032368f),
+            new Vector3(-977.6806f, -398.93262f, 49.289234f),
+            new Vector3(-970.7219f, -398.24976f, 49.222878f),
+            new Vector3(-963.75134f, -397.53604f, 49.212234f),
+            new Vector3(-956.7563f, -396.79013f, 48.97277f),
+            new Vector3(-949.8393f, -395.6784f, 48.683266f),
+            new Vector3(-936.1287f, -392.95218f, 48.982155f),
+            new Vector3(-929.2563f, -391.58563f, 49.11442f),
+            new Vector3(-922.36725f, -390.19583f, 49.464878f),
+            new Vector3(-915.659f, -388.6048f, 49.353508f),
+            new Vector3(-908.7471f, -387.54395f, 49.01247f),
+            new Vector3(-894.77765f, -387.8724f, 48.66959f),
+            new Vector3(-887.9169f, -389.40952f, 48.6812f),
+            new Vector3(-881.2512f, -391.3051f, 48.631622f),
+            new Vector3(-874.3487f, -392.95554f, 48.670547f),
+            new Vector3(-860.9755f, -397.05374f, 49.35329f),
+            new Vector3(-854.80286f, -400.21347f, 50.36403f),
+            new Vector3(-848.98413f, -404.16757f, 51.423885f),
+            new Vector3(-843.78217f, -408.69653f, 52.015774f),
+            new Vector3(-839.0298f, -413.86685f, 52.365005f),
+            new Vector3(-831.13153f, -425.39862f, 52.869904f),
+            new Vector3(-828.0351f, -431.66058f, 53.18187f),
+            new Vector3(-824.95294f, -437.95978f, 53.65627f),
+            new Vector3(-821.18744f, -443.9123f, 54.52704f),
+            new Vector3(-810.42865f, -452.31207f, 54.894554f),
+            new Vector3(-803.4935f, -452.26376f, 55.426872f),
+            new Vector3(-796.81934f, -450.08676f, 56.40639f),
+            new Vector3(-790.7716f, -446.75473f, 57.23198f),
+            new Vector3(-778.8642f, -439.2531f, 60.545483f),
+            new Vector3(-772.44275f, -436.6931f, 62.349552f),
+            new Vector3(-765.7205f, -434.6679f, 64.0752f),
+            new Vector3(-758.9801f, -432.7031f, 65.24951f),
+            new Vector3(-752.3232f, -430.47943f, 66.18042f),
+            new Vector3(-739.7005f, -424.66257f, 67.09672f),
+            new Vector3(-733.4542f, -421.36865f, 67.58977f),
+            new Vector3(-727.5276f, -417.606f, 67.59908f),
+            new Vector3(-722.2294f, -413.1753f, 67.59908f),
+            new Vector3(-714.4305f, -401.5478f, 67.59964f),
+            new Vector3(-713.8392f, -394.74866f, 67.634636f),
+            new Vector3(-716.3705f, -388.14655f, 67.49939f),
+            new Vector3(-718.78076f, -381.60843f, 67.4844f),
+            new Vector3(-719.9561f, -374.69843f, 67.788216f),
+            new Vector3(-715.74005f, -362.05017f, 66.937515f),
+            new Vector3(-709.4353f, -359.03613f, 66.54576f),
+            new Vector3(-702.6109f, -359.57547f, 66.329605f),
+            new Vector3(-696.22406f, -362.38806f, 65.91025f),
+            new Vector3(-690.2517f, -366.05084f, 65.89946f),
+            new Vector3(-677.864f, -372.6714f, 65.86404f),
+            new Vector3(-671.69946f, -375.98645f, 65.582405f),
+            new Vector3(-665.6493f, -379.35138f, 64.54061f),
+            new Vector3(-659.5833f, -382.8866f, 63.434433f),
+            new Vector3(-653.44763f, -386.44135f, 62.06952f),
+            new Vector3(-641.0839f, -392.76675f, 59.744854f),
+            new Vector3(-634.2223f, -394.39014f, 59.44911f),
+            new Vector3(-627.3053f, -395.4555f, 59.015675f),
+            new Vector3(-620.339f, -396.05783f, 59.236702f),
+            new Vector3(-614.0311f, -396.4334f, 60.858475f)
+        ];
+    }
+}

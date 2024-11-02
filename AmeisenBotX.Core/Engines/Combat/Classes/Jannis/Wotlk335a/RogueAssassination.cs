@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class RogueAssassination : BasicCombatClass
     {
-        public RogueAssassination(AmeisenBotInterfaces bot) : base(bot)
+        public RogueAssassination(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Rogue335a.SliceAndDice, () => TryCastSpellRogue(Rogue335a.SliceAndDice, 0, true, true, 1)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Rogue335a.ColdBlood, () => TryCastSpellRogue(Rogue335a.ColdBlood, 0, true)));

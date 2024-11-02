@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -52,6 +53,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         public string Description => "...";
 
         public string Name => "RunBoyRunEngine";
+
+        public IBattlegroundProfile Profile { get; set; }
 
         public void Enter()
         {
@@ -300,7 +303,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     Bot.CombatClass?.OutOfCombatExecute();
                 }
             }
-            if (Bot.Movement.Status == Movement.Enums.MovementAction.None)
+            if (Bot.Movement.CurrentMovementAction == Movement.Enums.MovementAction.None)
             {
                 hasStateChanged = true;
                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);

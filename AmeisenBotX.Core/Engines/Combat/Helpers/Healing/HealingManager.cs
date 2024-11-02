@@ -1,13 +1,13 @@
-﻿using AmeisenBotX.Common.Utils;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Healing.Enums;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 {
@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         /// <summary>
         /// Create a new instance of the HealingManager that is used to choose healing spell in a
         /// smart way. It observes the heals done by the bot and remembers how much each spell
-        /// healed. Based of that knoweledge it is able to cancel spells to prevent overheal and
+        /// healed. Based of that knowledge it is able to cancel spells to prevent over-heal and
         /// choose fast heals when the target is going to die in a few seconds.
         /// </summary>
         /// <param name="bot">AmeisenBotInterfaces collection</param>
@@ -162,7 +162,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 if (SpellHealing.ContainsKey(castingSpell))
                 {
                     int missingHealth = target.MaxHealth - target.Health;
-                    int maxAllowedHeal = (int)(SpellHealing[castingSpell] * (1.0f + OverhealingStopThreshold));
+                    int maxAllowedHeal = SpellHealing[castingSpell];
+                    //int maxAllowedHeal = (int)(SpellHealing[castingSpell] * (1.0f + OverhealingStopThreshold));
 
                     // if the cast would be more than x% overheal, stop it
                     if (missingHealth < maxAllowedHeal)
@@ -191,13 +192,19 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 UpdateSpellHealing();
             }
 
-            List<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => !e.IsDead).ToList();
-            healableTargets.Add(Bot.Player);
+            List<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.PartyMembers.Where(e =>
+                !e.IsDead
+                && e.HealthPercentage < 90
+                && e.Position.GetDistance(Bot.Player.Position) < 40).ToList();
+
+            //healableTargets.Add(Bot.Player);
 
             // is anyone going to die in the next seconds that we could save order by max health to
             // prioritize tanks
-            IEnumerable<IWowUnit> dyingTargets = healableTargets.OrderBy(e => e.MaxHealth)
-                .Where(e => e.HealthPercentage < 20.0 || (IncomingDamage.ContainsKey(e.Guid) && e.Health - (IncomingDamage[e.Guid] * TargetDyingSeconds) <= 0));
+            IEnumerable<IWowUnit> dyingTargets = healableTargets
+                .OrderBy(e => e.MaxHealth)
+                .Where(e => e.HealthPercentage < 20.0
+                            || (IncomingDamage.ContainsKey(e.Guid) && e.Health - (IncomingDamage[e.Guid] * TargetDyingSeconds) <= 0));
 
             if (dyingTargets != null)
             {
@@ -208,7 +215,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 {
                     foreach ((Spell spell, HealSpellType spellType) in fastestHeals)
                     {
-                        if (TryCastSpellAction(spell.Name, dyingTarget.Guid))
+
+                        if (!dyingTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == spell.Name)
+                            && TryCastSpellAction(spell.Name, dyingTarget.Guid))
                         {
                             return true;
                         }
@@ -216,14 +225,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            // is there anyone that we could heal with max allowed overheal
-            IEnumerable<IWowUnit> targetsNeedToBeHealed = healableTargets.Where(e => SpellHealing.Any(x => (e.MaxHealth - e.Health) >= x.Value * (1.0f + MaxOverheal)));
+            // is there anyone that we could heal with max allowed over-heal
+            IEnumerable<IWowUnit> targetsNeedToBeHealed = healableTargets.Where(e =>
+                SpellHealing.Any(x => (e.MaxHealth - e.Health) >= x.Value * (1.0f + MaxOverheal)));
 
             if (targetsNeedToBeHealed.Any())
             {
                 // prioritize target with the most incoming damage per second
                 int maxDamage = IncomingDamage.Count > 0 ? IncomingDamage.Max(e => e.Value) : 0;
-                List<(ulong, double, int)> weightedTargets = [];
+                List<(IWowUnit, double, int)> weightedTargets = [];
 
                 foreach (IWowUnit target in targetsNeedToBeHealed)
                 {
@@ -233,16 +243,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                     double weight = healthWeight + damageWeight;
 
                     // if target gets healed by other player, reduce weight by 50%
-                    if (Bot.Wow.ObjectProvider.Partymembers.Any(e => e.TargetGuid == target.Guid && e.IsCasting))
+                    if (Bot.Wow.ObjectProvider.PartyMembers.Any(e => e.TargetGuid == target.Guid && e.IsCasting))
                     {
                         weight *= 0.5;
                     }
 
-                    weightedTargets.Add((target.Guid, weight, target.MaxHealth - target.Health));
+                    weightedTargets.Add((target, weight, target.MaxHealth - target.Health));
                 }
 
                 // sort by weight and process them
-                foreach ((ulong guid, double weight, int missingHealth) in weightedTargets.OrderByDescending(e => e.Item2))
+                foreach ((IWowUnit target, double weight, int missingHealth) in weightedTargets.OrderByDescending(e => e.Item2))
                 {
                     // filter spell that would overheal us and then order by the amount of healing
                     IEnumerable<(Spell, HealSpellType)> heals = HealingSpells
@@ -257,7 +267,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 
                     foreach ((Spell spell, HealSpellType spellType) in heals)
                     {
-                        if (TryCastSpellAction(spell.Name, guid))
+                        if (!target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == spell.Name)
+                            && TryCastSpellAction(spell.Name, target.Guid))
                         {
                             return true;
                         }
@@ -265,7 +276,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            // if not, simulate further incoming damage to see whether we could compesate that
+            // if not, simulate further incoming damage to see whether we could compensate that
             // damage in our cast time
             foreach (IWowUnit target in healableTargets)
             {
@@ -279,6 +290,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                     int simulatedHealthMissing = healthMissing + (IncomingDamage[target.Guid] * (spell.CastTime / 1000));
 
                     if (simulatedHealthMissing >= SpellHealing[spell.Name]
+                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == spell.Name)
                         && TryCastSpellAction(spell.Name, target.Guid))
                     {
                         return true;
@@ -300,7 +312,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         /// <param name="over">Overdamage</param>
         private void OnDamage(ulong src, ulong dst, int spellId, int amount, int over)
         {
-            if (dst == Bot.Wow.PlayerGuid || Bot.Wow.ObjectProvider.Partymembers.Any(e => e.Guid == dst))
+            if (dst == Bot.Wow.PlayerGuid || Bot.Wow.ObjectProvider.PartyMembers.Any(e => e.Guid == dst))
             {
                 DateTime now = DateTime.UtcNow;
 

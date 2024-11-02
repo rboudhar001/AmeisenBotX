@@ -185,6 +185,12 @@ namespace AmeisenBotX.Wow.Cache
 
         public WowUnitReaction GetReaction(IWowUnit a, IWowUnit b)
         {
+            // TODO: test and fix this
+            if (a == null || b == null)
+            {
+                return WowUnitReaction.Trash;
+            }
+
             if (Reactions.ContainsKey(a.FactionTemplate) && Reactions[a.FactionTemplate].ContainsKey(b.FactionTemplate))
             {
                 return Reactions[a.FactionTemplate][b.FactionTemplate];

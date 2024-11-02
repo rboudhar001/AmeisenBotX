@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace AmeisenBotX.Wow.Events
 {
@@ -45,6 +46,9 @@ namespace AmeisenBotX.Wow.Events
         {
             if (eventJson.Length > 2)
             {
+                // preprocess the JSON string to remove invalid characters
+                // eventJson = SanitizeJsonString(eventJson);
+
                 try
                 {
                     List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new JsonSerializerOptions()
@@ -74,6 +78,45 @@ namespace AmeisenBotX.Wow.Events
                     AmeisenLogger.I.Log("WoWEvents", $"Failed parsing events: {eventJson}\n{e}", LogLevel.Error);
                 }
             }
+        }
+
+        private string SanitizeJsonString(string jsonString)
+        {
+            // Remove the trailing comma in all "args" arrays
+            jsonString = Regex.Replace(jsonString, @",(\s*\])", "$1");
+
+            // Replace invalid escape sequences
+            jsonString = Regex.Replace(jsonString, @"\\[^\\""'bfnrtu]", match =>
+            {
+                char c = match.Value[1];
+                return $"\\u{((int)c):X4}";
+            });
+
+            // Replace non-printable characters with their Unicode escape sequences
+            jsonString = Regex.Replace(jsonString, @"[\x00-\x1F\x7F-\x9F]", match =>
+            {
+                char c = match.Value[0];
+                return $"\\u{((int)c):X4}";
+            });
+
+            // Escape double quotes within strings
+            jsonString = Regex.Replace(jsonString, "(?<=\")[^\"]*?(?=\")", match =>
+            {
+                string innerString = match.Value;
+                return innerString.Replace("\"", "\\\"");
+            });
+
+            // Fix incorrect string formatting
+            jsonString = Regex.Replace(jsonString, @"""(\d+)""\s*""(\d+)""", "\"$1\",\"$2\"");
+
+            // Escape sequences that are not valid in JSON
+            jsonString = Regex.Replace(jsonString, @"[\p{Cs}]", match =>
+            {
+                char c = match.Value[0];
+                return $"\\u{((int)c):X4}";
+            });
+
+            return jsonString;
         }
 
         ///<inheritdoc cref="IEventManager.Start"/>

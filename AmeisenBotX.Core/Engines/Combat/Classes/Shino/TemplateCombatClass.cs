@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
-    public abstract class TemplateCombatClass(AmeisenBotInterfaces bot) : BasicCombatClass(bot)
+    public abstract class TemplateCombatClass(AmeisenBotInterfaces bot, AmeisenBotConfig config) : BasicCombatClass(bot, config)
     {
         public new string Author { get; } = "Shino";
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                 Bot.Movement.Reset();
                 TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
             }
-            else if (Bot.Player.Position.GetDistance(target.Position) < 3.5f || Bot.Movement.Status == MovementAction.None)
+            else if (Bot.Player.Position.GetDistance(target.Position) < 3.5f || Bot.Movement.CurrentMovementAction == MovementAction.None)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
             }

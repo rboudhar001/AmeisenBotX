@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class PaladinProtection : BasicCombatClass
     {
-        public PaladinProtection(AmeisenBotInterfaces bot) : base(bot)
+        public PaladinProtection(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.DevotionAura, () => TryCastSpell(Paladin335a.DevotionAura, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.BlessingOfKings, () => TryCastSpell(Paladin335a.BlessingOfKings, 0, true)));

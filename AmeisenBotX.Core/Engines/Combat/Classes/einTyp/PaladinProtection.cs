@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
@@ -12,9 +13,10 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 {
-    public class PaladinProtection(AmeisenBotInterfaces bot) : ICombatClass
+    public class PaladinProtection(AmeisenBotInterfaces bot, AmeisenBotConfig config) : ICombatClass
     {
         private readonly AmeisenBotInterfaces Bot = bot;
+        private readonly AmeisenBotConfig Config = config;
         private readonly string[] runningEmotes = ["/question", "/talk"];
         private readonly string[] standingEmotes = ["/bow"];
         private bool computeNewRoute = false;
@@ -80,6 +82,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         };
 
+        public ITargetProvider TargetProviderDps { get; set; }
+
+        public ITargetProvider TargetProviderHeal { get; set; }
+
+        public ITargetProvider TargetProviderTank { get; set; }
+
         public string Version => "1.0";
 
         public bool WalkBehindEnemy => false;
@@ -111,6 +119,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private Vector3 LastTargetPosition { get; set; }
 
         private DateTime LastWisdom { get; set; }
+
+        public virtual bool TryToTravel()
+        {
+            return false;
+        }
 
         public void AttackTarget()
         {
@@ -179,7 +192,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = Bot.Objects.Partyleader.Guid;
+                ulong leaderGuid = Bot.Objects.PartyLeader.Guid;
                 IWowUnit target = Bot.Target;
                 IWowUnit leader = null;
                 if (leaderGuid != 0)
@@ -311,7 +324,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             // support members
             int lowHealth = 2147483647;
             IWowUnit lowMember = null;
-            foreach (ulong memberGuid in Bot.Objects.PartymemberGuids)
+            foreach (ulong memberGuid in Bot.Objects.PartyMemberGuids)
             {
                 IWowUnit member = Bot.GetWowObjectByGuid<IWowUnit>(memberGuid);
                 if (member != null && member.Health < lowHealth)
@@ -411,7 +424,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 return;
             }
 
-            if (Bot.Movement.Status != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (Bot.Player.CombatReach + target.CombatReach))
+            if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (Bot.Player.CombatReach + target.CombatReach))
             {
                 Bot.Movement.StopMovement();
             }

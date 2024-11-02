@@ -277,7 +277,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Slider x:Name="sliderMaxFollowDistance" HorizontalAlignment="Left" Margin="4,194,0,0" VerticalAlignment="Top" Width="179" Maximum="1024" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Slider x:Name="sliderMaxFollowDistance" HorizontalAlignment="Left" Margin="4,194,0,0" VerticalAlignment="Top" Width="179" Maximum="300" Minimum="40" SmallChange="10" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
                         <Label x:Name="labelFollowing" Content="Following" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
@@ -363,8 +363,8 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        <Slider x:Name="sliderMinFollowDistance" HorizontalAlignment="Left" Margin="4,146,0,0" VerticalAlignment="Top" Width="179" Maximum="24" Minimum="3" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
-                        <Label x:Name="labelMinFollowDistance" Content="Min Follow Distance: " HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,121,0,0" Padding="0,5,5,5" Width="179">
+                        <Slider x:Name="sliderMinFollowDistance" HorizontalAlignment="Left" Margin="4,146,0,0" VerticalAlignment="Top" Width="179" Maximum="30" Minimum="10" SmallChange="10" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelMinFollowDistance" Content="Min Follow Distance:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,121,0,0" Padding="0,5,5,5" Width="179">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
@@ -963,6 +963,23 @@
                             </Label.Foreground>
                         </Label>
                         <Slider x:Name="sliderAssistRange" HorizontalAlignment="Left" Margin="244,60,0,0" VerticalAlignment="Top" Width="180" Maximum="100" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" FontFamily="Bahnschrift Light" ValueChanged="SliderAssistRange_ValueChanged" />
+                        <Label x:Name="labelSaveMySelf" Content="Save Myself" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="470,4,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label x:Name="labelFightUntilHealth" Content="Fight Until (health):" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="470,34,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderFightUntilHealth" HorizontalAlignment="Left" Margin="470,58,0,0" VerticalAlignment="Top" Width="180" Maximum="100" Minimum="0" SmallChange="10" Style="{DynamicResource SliderStyleDark}" FontFamily="Bahnschrift Light" ValueChanged="SliderFightUntilHealth_ValueChanged" />
+                        <Label x:Name="labelFightUntilMana" Content="Fight Until (mana):" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="470,87,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderFightUntilMana" HorizontalAlignment="Left" Margin="470,115,0,0" VerticalAlignment="Top" Width="180" Maximum="100" Minimum="0" SmallChange="10" Style="{DynamicResource SliderStyleDark}" FontFamily="Bahnschrift Light" ValueChanged="SliderFightUntilMana_ValueChanged" />
                     </Grid>
                 </Border>
             </TabItem>
@@ -1318,7 +1335,23 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <CheckBox x:Name="checkboxAutoDisableRendering" Content="Auto Disable Rendering" HorizontalAlignment="Left" Margin="471,34,0,0" VerticalAlignment="Top" TabIndex="17" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="174" VerticalContentAlignment="Bottom">
+                        <CheckBox x:Name="checkboxAutoDisableRendering" Content="Auto Disable Rendering" HorizontalAlignment="Left" Margin="472,36,0,0" VerticalAlignment="Top" TabIndex="17" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="174" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <Label x:Name="labelCreatePath" Content="Create Path" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="468,213,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxCreatePath" Content="Start creating a new path" HorizontalAlignment="Left" Margin="468,247,0,0" VerticalAlignment="Top" TabIndex="17" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="174" VerticalContentAlignment="Bottom">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>

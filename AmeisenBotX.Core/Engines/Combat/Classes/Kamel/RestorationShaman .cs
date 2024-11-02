@@ -56,10 +56,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private const string windShearSpell = "Wind Shear";
 
-        public RestorationShaman(AmeisenBotInterfaces bot) : base()
+        public RestorationShaman(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
-
             //Race
             //spellCoolDown.Add(giftOfTheNaaruSpell, DateTime.Now);
 
@@ -199,11 +197,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private void StartHeal()
         {
-            // List<IWowUnit> partyMemberToHeal = Bot.ObjectManager.Partymembers.Where(e =>
+            // List<IWowUnit> partyMemberToHeal = Bot.ObjectManager.PartyMembers.Where(e =>
             // e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e =>
             // e.HealthPercentage).ToList();//FirstOrDefault => tolist
 
-            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.Partymembers)
+            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.PartyMembers)
             {
                 //healableUnits.AddRange(Bot.ObjectManager.PartyPets);
                 Bot.Player
@@ -227,7 +225,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         {
                             return;
                         }
-                        if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
+                        if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None)
                         {
                             Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();
@@ -330,7 +328,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         {
                             return;
                         }
-                        if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
+                        if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None)
                         {
                             Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();

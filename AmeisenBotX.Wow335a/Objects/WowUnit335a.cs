@@ -48,7 +48,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public bool IsAutoAttacking { get; set; }
 
-        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
+        public bool IsDead => (Health <= 1 || UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
 
         public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.Lootable];
 

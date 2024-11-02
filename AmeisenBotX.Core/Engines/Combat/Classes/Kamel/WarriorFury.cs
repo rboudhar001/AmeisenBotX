@@ -51,9 +51,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         private const string victoryRushSpell = "Victory Rush";
         private const string whirlwindSpell = "Whirlwind";
 
-        public WarriorFury(AmeisenBotInterfaces bot) : base()
+        public WarriorFury(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
             spellCoolDown.Add(ShootSpell, DateTime.Now);
             //Stances
             spellCoolDown.Add(defensiveStanceSpell, DateTime.Now);
@@ -351,7 +350,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Entangling Roots")
                         || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Nova"))
                     {
-                        if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
+                        if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None)
                         {
                             Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();

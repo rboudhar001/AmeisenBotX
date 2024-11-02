@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
         public bool Enter()
         {
             return Bot.Objects.CenterPartyPosition != Vector3.Zero
-                && Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Wow.PlayerGuid && e.Position.GetDistance(Bot.Player.Position) < 12.0f);
+                && Bot.Objects.PartyMembers.Any(e => e.Guid != Bot.Wow.PlayerGuid && e.Position.GetDistance(Bot.Player.Position) < 12.0f);
         }
 
         public void Execute()

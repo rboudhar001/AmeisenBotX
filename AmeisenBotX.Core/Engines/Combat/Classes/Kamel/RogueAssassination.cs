@@ -7,9 +7,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 {
     internal class RogueAssassination : BasicKamelClass
     {
-        public RogueAssassination(AmeisenBotInterfaces bot) : base()
+        public RogueAssassination(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
         }
 
         public override string Author => "Lukas";

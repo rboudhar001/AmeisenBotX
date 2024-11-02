@@ -57,10 +57,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         //Stunns|Interrupting
         private const string windShearSpell = "Wind Shear";
 
-        public ShamanEnhancement(AmeisenBotInterfaces bot) : base()
+        public ShamanEnhancement(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
-
             //Shield
             spellCoolDown.Add(lightningShieldSpell, DateTime.Now);
 

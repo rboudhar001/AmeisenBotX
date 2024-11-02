@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public class PriestShadow : BasicCombatClassBia10
     {
-        public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
+        public PriestShadow(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () =>
                 Bot.Player.ManaPercentage > 60.0

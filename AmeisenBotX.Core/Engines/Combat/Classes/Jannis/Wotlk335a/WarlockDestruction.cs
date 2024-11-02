@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class WarlockDestruction : BasicCombatClass
     {
-        public WarlockDestruction(AmeisenBotInterfaces bot) : base(bot)
+        public WarlockDestruction(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             PetManager = new PetManager
             (

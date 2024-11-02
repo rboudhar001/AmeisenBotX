@@ -37,15 +37,34 @@ namespace AmeisenBotX.Wow.Objects
 
         int ObjectCount { get; }
 
-        IWowUnit Partyleader { get; }
+        IWowUnit PartyLeader { get; }
 
-        IEnumerable<ulong> PartymemberGuids { get; }
+        // group
+        IEnumerable<IWowUnit> GroupMembers { get; }
 
-        IEnumerable<IWowUnit> Partymembers { get; }
+        IEnumerable<ulong> GroupMemberGuids { get; }
 
-        IEnumerable<ulong> PartyPetGuids { get; }
+        IEnumerable<IWowUnit> GroupPets { get; }
+
+        IEnumerable<ulong> GroupPetGuids { get; }
+
+        // raid
+        IEnumerable<IWowUnit> RaidMembers { get; }
+
+        IEnumerable<ulong> RaidMemberGuids { get; }
+
+        IEnumerable<IWowUnit> RaidPets { get; }
+
+        IEnumerable<ulong> RaidPetGuids { get; }
+
+        // party
+        IEnumerable<IWowUnit> PartyMembers { get; }
+
+        IEnumerable<ulong> PartyMemberGuids { get; }
 
         IEnumerable<IWowUnit> PartyPets { get; }
+
+        IEnumerable<ulong> PartyPetGuids { get; }
 
         IWowUnit Pet { get; }
 

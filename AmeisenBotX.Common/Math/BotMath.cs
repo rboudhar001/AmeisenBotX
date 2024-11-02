@@ -24,6 +24,30 @@ namespace AmeisenBotX.Common.Math
         }
 
         /// <summary>
+        /// Calculates a new position C which is X meters away from B along the line from A to B.
+        /// </summary>
+        /// <param name="positionA">Position from where we move.</param>
+        /// <param name="positionB">Position where we want to move.</param>
+        /// <param name="distanceX">Distance to keep from B (if distance is 0, C will be B)</param>
+        /// <returns>Position C which is X meters away from B along the line from A to B</returns>
+        public static Vector3 CalculatePositionBetween(Vector3 positionA, Vector3 positionB, float distanceX)
+        {
+            // calculate the direction vector from A to B
+            Vector3 direction = positionB - positionA;
+
+            // normalize the direction vector to get the unit vector
+            direction.Normalize();
+
+            // scale the unit vector by the distance X
+            Vector3 scaledDirection = direction * distanceX;
+
+            // calculate the new position C which is X meters away from B
+            Vector3 positionC = positionB - scaledDirection;
+
+            return positionC;
+        }
+
+        /// <summary>
         /// Get the amount of rotation needed to face the target position.
         /// </summary>
         /// <param name="position">Current position</param>

@@ -149,7 +149,7 @@ namespace AmeisenBotX.Core
             return GetNearEnemies<T>(position, distance)                                // is hostile
                 .Where(e => e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther)      // needs to be in combat and tagged by us or no one else
                          && (e.TargetGuid == Player.Guid                                // targets us
-                            || Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))); // targets a party member
+                            || Objects.PartyMembers.Any(x => x.Guid == e.TargetGuid))); // targets a party member
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -195,7 +195,7 @@ namespace AmeisenBotX.Core
         {
             return GetNearEnemies<T>(position, distance)                           // is hostile
                 .Where(e => e.IsInCombat                                           // is in combat
-                         && (Objects.Partymembers.Any(x => x.Guid == e.TargetGuid) // is targeting a partymember
+                         && (Objects.PartyMembers.Any(x => x.Guid == e.TargetGuid) // is targeting a partymember
                          || Objects.PartyPets.Any(x => x.Guid == e.TargetGuid)));  // is targeting a pet in party
         }
 
@@ -229,7 +229,7 @@ namespace AmeisenBotX.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetNearPartyMembers<T>(Vector3 position, float distance) where T : IWowUnit
         {
-            return Objects.Partymembers.OfType<T>()
+            return Objects.PartyMembers.OfType<T>()
                 .Where(e => !e.IsDead && !e.IsNotAttackable               // is alive and attackable
                          && e.Position.GetDistance(position) < distance); // is in range
         }

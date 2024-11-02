@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class WarlockAffliction : BasicCombatClass
     {
-        public WarlockAffliction(AmeisenBotInterfaces bot) : base(bot)
+        public WarlockAffliction(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             PetManager = new PetManager
             (

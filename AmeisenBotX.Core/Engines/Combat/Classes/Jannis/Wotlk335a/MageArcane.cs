@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class MageArcane : BasicCombatClass
     {
-        public MageArcane(AmeisenBotInterfaces bot) : base(bot)
+        public MageArcane(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.ArcaneIntellect, () => TryCastSpell(Mage335a.ArcaneIntellect, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.MageArmor, () => TryCastSpell(Mage335a.MageArmor, 0, true)));

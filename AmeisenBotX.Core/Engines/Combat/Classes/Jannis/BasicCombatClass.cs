@@ -1,4 +1,8 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
@@ -13,17 +17,13 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public abstract class BasicCombatClass : SimpleConfigurable, ICombatClass
     {
         private readonly int[] useableHealingItems =
-                                                                                                                                                                                                                                                                                                                                                                                [
+        [
             // potions
             118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
             // healthstones
@@ -36,27 +36,28 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         ];
 
-        protected BasicCombatClass(AmeisenBotInterfaces bot)
+        protected BasicCombatClass(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
+            Config = config;
 
             SpellAbortFunctions = [];
 
-            CooldownManager = new(Bot.Character.SpellBook.Spells);
-            RessurrectionTargets = [];
+            CooldownManager = new CooldownManager(Bot.Character.SpellBook.Spells);
+            ResurrectionTargets = [];
 
-            TargetProviderDps = new TargetManager(Bot, WowRole.Dps, TimeSpan.FromMilliseconds(250));
-            TargetProviderTank = new TargetManager(Bot, WowRole.Tank, TimeSpan.FromMilliseconds(250));
-            TargetProviderHeal = new TargetManager(Bot, WowRole.Heal, TimeSpan.FromMilliseconds(250));
+            TargetProviderDps = new TargetManager(Bot, Config, WowRole.Dps, TimeSpan.FromMilliseconds(250));
+            TargetProviderTank = new TargetManager(Bot, Config, WowRole.Tank, TimeSpan.FromMilliseconds(250));
+            TargetProviderHeal = new TargetManager(Bot, Config, WowRole.Heal, TimeSpan.FromMilliseconds(250));
 
-            MyAuraManager = new(Bot);
-            TargetAuraManager = new(Bot);
-            GroupAuraManager = new(Bot);
+            MyAuraManager = new AuraManager(Bot);
+            TargetAuraManager = new AuraManager(Bot);
+            GroupAuraManager = new GroupAuraManager(Bot);
 
-            InterruptManager = new();
+            InterruptManager = new InterruptManager();
 
-            EventCheckFacing = new(TimeSpan.FromMilliseconds(500));
-            EventAutoAttack = new(TimeSpan.FromMilliseconds(500));
+            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
             Configurables.TryAdd("HealthItemThreshold", 30.0);
             Configurables.TryAdd("ManaItemThreshold", 30.0);
@@ -94,7 +95,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public IEnumerable<int> PriorityTargetDisplayIds { get => TargetProviderDps.PriorityTargets; set => TargetProviderDps.PriorityTargets = value; }
 
-        public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
+        public Dictionary<string, DateTime> ResurrectionTargets { get; private set; }
 
         public abstract WowRole Role { get; }
 
@@ -102,11 +103,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public AuraManager TargetAuraManager { get; private set; }
 
-        public ITargetProvider TargetProviderDps { get; private set; }
+        public ITargetProvider TargetProviderDps { get; set; }
 
-        public ITargetProvider TargetProviderHeal { get; private set; }
+        public ITargetProvider TargetProviderHeal { get; set; }
 
-        public ITargetProvider TargetProviderTank { get; private set; }
+        public ITargetProvider TargetProviderTank { get; set; }
 
         public abstract bool UseAutoAttacks { get; }
 
@@ -120,11 +121,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected AmeisenBotInterfaces Bot { get; }
 
+        protected AmeisenBotConfig Config { get; }
+
         protected DateTime LastSpellCast { get; private set; }
 
         protected List<Func<bool, bool>> SpellAbortFunctions { get; }
 
         private ulong CurrentCastTargetGuid { get; set; }
+
+        public virtual bool TryToTravel()
+        {
+            return false;
+        }
 
         public virtual void AttackTarget()
         {
@@ -147,10 +155,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public virtual void Execute()
         {
+            /*
             if (Bot.Target != null && EventCheckFacing.Run())
             {
                 CheckFacing(Bot.Target);
             }
+            */
 
             if (Bot.Player.IsCasting)
             {
@@ -164,14 +174,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Update Priority Units
             // --------------------------- >
-            if (Bot.Dungeon.Profile != null
-                && Bot.Dungeon.Profile.PriorityUnits != null
-                && Bot.Dungeon.Profile.PriorityUnits.Count > 0)
+            if (Bot.Dungeon.Profile is { PriorityUnits.Count: > 0 })
             {
                 TargetProviderDps.PriorityTargets = Bot.Dungeon.Profile.PriorityUnits;
             }
 
-            // Autoattacks
+            // Auto-attacks
             // --------------------------- >
             if (UseAutoAttacks)
             {
@@ -202,7 +210,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 return;
             }
 
-            // Useable items, potions, etc.
+            // Usable items, potions, etc.
             // ---------------------------- >
             if (Bot.Player.HealthPercentage < Configurables["HealthItemThreshold"])
             {
@@ -262,8 +270,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 return;
             }
 
-            if (MyAuraManager.Tick(Bot.Player.Auras)
-                || GroupAuraManager.Tick())
+            if (!Bot.Player.IsMounted
+                && (MyAuraManager.Tick(Bot.Player.Auras) || GroupAuraManager.Tick()))
             {
                 return;
             }
@@ -296,7 +304,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             return false;
         }
 
-        protected bool HandleDeadPartymembers(string spellName)
+        protected bool HandleDeadPartyMembers(string spellName)
         {
             Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
@@ -304,22 +312,22 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 && spell.Costs < Bot.Player.Mana
                 && !CooldownManager.IsSpellOnCooldown(spellName))
             {
-                IEnumerable<IWowPlayer> groupPlayers = Bot.Objects.Partymembers
+                IEnumerable<IWowPlayer> groupPlayers = Bot.Objects.PartyMembers
                     .OfType<IWowPlayer>()
                     .Where(e => e.IsDead);
 
                 if (groupPlayers.Any())
                 {
-                    IWowPlayer player = groupPlayers.FirstOrDefault(e => (Bot.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name)) || RessurrectionTargets[name] < DateTime.UtcNow);
+                    IWowPlayer player = groupPlayers.FirstOrDefault(e => (Bot.Db.GetUnitName(e, out string name) && !ResurrectionTargets.ContainsKey(name)) || ResurrectionTargets[name] < DateTime.UtcNow);
 
                     if (player != null)
                     {
                         if (Bot.Db.GetUnitName(player, out string name))
                         {
-                            if (!RessurrectionTargets.TryGetValue(name, out DateTime value))
+                            if (!ResurrectionTargets.TryGetValue(name, out DateTime value))
                             {
                                 value = DateTime.UtcNow + TimeSpan.FromSeconds(10);
-                                RessurrectionTargets.Add(name, value);
+                                ResurrectionTargets.Add(name, value);
                                 return TryCastSpell(spellName, player.Guid, true);
                             }
 
@@ -362,7 +370,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false, Func<bool> additionalValidation = null, Func<bool> additionalPreperation = null)
         {
-            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || (guid != 0 && guid != Bot.Wow.PlayerGuid && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName)) { return false; }
 
             if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
@@ -438,6 +446,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     {
                         if (IWowUnit.IsValidAlive(Bot.Target))
                         {
+                            //CheckFacing(Bot.Target);
                             return true;
                         }
                     }
@@ -493,7 +502,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     if (cooldown < 0)
                     {
                         // TODO: find bug that causes negative cooldowns
-                        cooldown = 100;
+                        cooldown = 1500;
                     }
 
                     CooldownManager.SetSpellCooldown(spellName, cooldown);
@@ -536,7 +545,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (spell.CastTime > 0)
             {
-                Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime), PreventMovementType.SpellCast);
+                Bot.Movement.PreventMovement(spell.CastTime, PreventMovementType.SpellCast);
             }
         }
 
@@ -555,7 +564,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 target = Bot.Player;
                 needToSwitchTargets = false;
             }
-            else if (guid == Bot.Wow.TargetGuid)
+            else if (guid == Bot.Target?.Guid)
+            //else if (guid == Bot.Wow.TargetGuid)
             {
                 target = Bot.Target;
                 needToSwitchTargets = false;

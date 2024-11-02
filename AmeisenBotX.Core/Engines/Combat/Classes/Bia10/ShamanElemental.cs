@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public class ShamanElemental : BasicCombatClassBia10
     {
-        public ShamanElemental(AmeisenBotInterfaces bot) : base(bot)
+        public ShamanElemental(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () =>
                 Bot.Player.ManaPercentage > 60.0

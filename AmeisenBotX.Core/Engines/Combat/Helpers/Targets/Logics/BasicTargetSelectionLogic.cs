@@ -8,11 +8,13 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
 {
-    public abstract class BasicTargetSelectionLogic(AmeisenBotInterfaces bot)
+    public abstract class BasicTargetSelectionLogic(AmeisenBotInterfaces bot, AmeisenBotConfig config)
     {
         public IEnumerable<int> BlacklistedTargets { get; set; }
 
         public AmeisenBotInterfaces Bot { get; } = bot;
+
+        public AmeisenBotConfig Config { get; } = config;
 
         public IEnumerable<int> PriorityTargets { get; set; }
 

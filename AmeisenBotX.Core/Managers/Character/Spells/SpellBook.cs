@@ -41,6 +41,7 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
             spell = GetSpellByName(spellname);
             return spell != null;
         }
+
         public void Update()
         {
             string rawSpells = Wow.GetSpells();

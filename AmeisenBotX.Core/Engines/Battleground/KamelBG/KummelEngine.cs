@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -46,6 +47,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         public string Description => "...";
 
         public string Name => "Kummel Engine";
+
+        public IBattlegroundProfile Profile { get; set; }
 
         private AmeisenBotInterfaces Bot { get; }
 

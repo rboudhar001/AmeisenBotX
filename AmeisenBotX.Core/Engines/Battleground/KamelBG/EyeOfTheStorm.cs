@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -16,6 +17,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         public string Description => "Eye of the Storm";
 
         public string Name => "Eye of the Storm";
+
+        public IBattlegroundProfile Profile { get; set; }
 
         public List<Vector3> PathBase { get; } =
         [

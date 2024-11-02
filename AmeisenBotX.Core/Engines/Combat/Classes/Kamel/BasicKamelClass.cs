@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
@@ -65,8 +66,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         ];
 
-        protected BasicKamelClass()
+        protected BasicKamelClass(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
+            Bot = bot;
+            Config = config;
+
             //Revive Spells
             spellCoolDown.Add(ancestralSpiritSpell, DateTime.Now);
             spellCoolDown.Add(redemptionSpell, DateTime.Now);
@@ -100,6 +104,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public AmeisenBotInterfaces Bot { get; internal set; }
 
+        protected AmeisenBotConfig Config { get; }
+
         public abstract Dictionary<string, dynamic> C { get; set; }
 
         public Dictionary<string, dynamic> Configureables { get; set; }
@@ -126,6 +132,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public bool TargetInLineOfSight => Bot.Objects.IsTargetInLineOfSight;
 
+        public ITargetProvider TargetProviderDps { get; set; }
+
+        public ITargetProvider TargetProviderHeal { get; set; }
+
+        public ITargetProvider TargetProviderTank { get; set; }
+
         public TimegatedEvent TargetSelectEvent { get; private set; }
 
         public abstract bool UseAutoAttacks { get; }
@@ -135,6 +147,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         public abstract bool WalkBehindEnemy { get; }
 
         public abstract WowClass WowClass { get; }
+
+        public virtual bool TryToTravel()
+        {
+            return false;
+        }
 
         //follow the target
         public void AttackTarget()
@@ -319,7 +336,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public void RevivePartyMember(string reviveSpellName)
         {
-            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.Partymembers)
+            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.PartyMembers)
             {
                 Bot.Player
             };

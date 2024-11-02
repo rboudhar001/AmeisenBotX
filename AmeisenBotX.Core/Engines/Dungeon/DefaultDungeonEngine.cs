@@ -48,13 +48,13 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                     ),
                     new Selector
                     (
-                        () => Bot.Objects.Partyleader == null || Bot.Objects.Partyleader.Guid == Bot.Wow.PlayerGuid || !Bot.Objects.PartymemberGuids.Any(),
+                        () => Bot.Objects.PartyLeader == null || Bot.Objects.PartyLeader.Guid == Bot.Wow.PlayerGuid || !Bot.Objects.RaidMemberGuids.Any(),
                         new Selector
                         (
                             () => AreAllPlayersPresent(20.0f, 14.0f),
                             new Selector
                             (
-                                () => Bot.Objects.Partymembers.Any(e => e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") || e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink")),
+                                () => Bot.Objects.PartyMembers.Any(e => e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") || e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink")),
                                 new Leaf(() => { return BtStatus.Success; }),
                                 new Leaf(() => FollowNodePath())
                             ),
@@ -62,8 +62,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                         ),
                         new Selector
                         (
-                            () => Bot.Objects.Partyleader != null,
-                            new Leaf(() => MoveToPosition(Bot.Objects.Partyleader.Position + LeaderFollowOffset, 0.0f, MovementAction.Follow)),
+                            () => Bot.Objects.PartyLeader != null,
+                            new Leaf(() => MoveToPosition(Bot.Objects.PartyLeader.Position + LeaderFollowOffset, 0.0f, MovementAction.Follow)),
                             new Leaf(() => { return BtStatus.Success; })
                         )
                     )
@@ -169,7 +169,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
         private bool AreAllPlayersPresent(float distance, float distanceToStartRunning)
         {
-            if (!Bot.Objects.Partymembers.Any())
+            if (!Bot.Objects.PartyMembers.Any())
             {
                 return true;
             }
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
             int nearPlayers = Bot.GetNearPartyMembers<IWowPlayer>(Bot.Player.Position, distance).Count(e => !e.IsDead);
 
-            if (nearPlayers >= Bot.Objects.Partymembers.Count() - 1)
+            if (nearPlayers >= Bot.Objects.PartyMembers.Count() - 1)
             {
                 IsWaitingForGroup = false;
                 return true;

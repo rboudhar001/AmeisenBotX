@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 {
     public class PaladinHoly : BasicCombatClass
     {
-        public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
+        public PaladinHoly(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             Configurables.TryAdd("AttackInGroups", true);
             Configurables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
         {
             base.Execute();
 
-            IEnumerable<IWowUnit> validPartymembers = Bot.Objects.Partymembers.Where(e => IWowUnit.IsValidAliveInCombat(e));
+            IEnumerable<IWowUnit> validPartymembers = Bot.Objects.PartyMembers.Where(e => IWowUnit.IsValidAliveInCombat(e));
 
             IWowUnit dyingUnit = validPartymembers.FirstOrDefault(e => e.HealthPercentage < 14.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
 

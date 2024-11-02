@@ -773,6 +773,16 @@ namespace AmeisenBotX.Wow548
             ClickUiElement("WorldStateScoreFrameLeaveButton");
         }
 
+        public double GetBattlefieldTimeRunning()
+        {
+            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetBattlefieldInstanceRunTime();"), out string t))
+            {
+                return double.Parse(t) / 1000 / 60;
+            }
+
+            return 0;
+        }
+
         public void LootEverything()
         {
             LuaDoString(BotUtils.ObfuscateLua("{v:0}=GetNumLootItems()for a={v:0},1,-1 do LootSlot(a)ConfirmLootSlot(a)end").Item1);

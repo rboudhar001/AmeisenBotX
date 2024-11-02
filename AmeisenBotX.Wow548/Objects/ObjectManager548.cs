@@ -6,50 +6,91 @@ namespace AmeisenBotX.Wow548.Objects
 {
     public class ObjectManager548(WowMemoryApi memory) : ObjectManager<WowObject548, WowUnit548, WowPlayer548, WowGameobject548, WowDynobject548, WowItem548, WowCorpse548, WowContainer548>(memory)
     {
-        protected override void ReadParty()
+        protected override void ReadGroup()
         {
-            if (ReadPartyPointer(out nint party)
+            if (ReadLeaderGuid(out nint party)
                 && Memory.Read(nint.Add(party, 0xC4), out int count) && count > 0)
             {
-                PartymemberGuids = ReadPartymemberGuids(party);
-                Partymembers = wowObjects.OfType<IWowUnit>().Where(e => PartymemberGuids.Contains(e.Guid));
+                GroupMemberGuids = ReadRaidMemberGuids(party);
+                GroupMembers = wowObjects.OfType<IWowUnit>().Where(e => GroupMemberGuids.Contains(e.Guid));
 
                 Vector3 pos = new();
 
-                foreach (Vector3 vec in Partymembers.Select(e => e.Position))
+                foreach (Vector3 vec in GroupMembers.Select(e => e.Position))
                 {
                     pos += vec;
                 }
 
-                CenterPartyPosition = pos / Partymembers.Count();
+                CenterPartyPosition = pos / GroupMembers.Count();
 
-                PartyPetGuids = PartyPets.Select(e => e.Guid);
-                PartyPets = wowObjects.OfType<IWowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
+                GroupPetGuids = GroupPets.Select(e => e.Guid);
+                GroupPets = wowObjects.OfType<IWowUnit>().Where(e => GroupMemberGuids.Contains(e.SummonedByGuid));
             }
         }
 
-        private IEnumerable<ulong> ReadPartymemberGuids(nint party)
+        protected override void ReadRaid()
         {
-            List<ulong> partymemberGuids = [];
+            if (ReadLeaderGuid(out nint party)
+                && Memory.Read(nint.Add(party, 0xC4), out int count) && count > 0)
+            {
+                RaidMemberGuids = ReadRaidMemberGuids(party);
+                RaidMembers = wowObjects.OfType<IWowUnit>().Where(e => RaidMemberGuids.Contains(e.Guid));
+
+                Vector3 pos = new();
+
+                foreach (Vector3 vec in RaidMembers.Select(e => e.Position))
+                {
+                    pos += vec;
+                }
+
+                CenterPartyPosition = pos / RaidMembers.Count();
+
+                RaidPetGuids = RaidPets.Select(e => e.Guid);
+                RaidPets = wowObjects.OfType<IWowUnit>().Where(e => RaidMemberGuids.Contains(e.SummonedByGuid));
+            }
+        }
+
+        protected override void ReadParty()
+        {
+            if (RaidMembers.Count() == 0)
+            {
+                PartyMembers = RaidMembers;
+                PartyMemberGuids = RaidMemberGuids;
+                PartyPets = RaidPets;
+                PartyPetGuids = RaidPetGuids;
+            }
+            else
+            {
+                PartyMembers = GroupMembers;
+                PartyMemberGuids = GroupMemberGuids;
+                PartyPets = GroupPets;
+                PartyPetGuids = GroupPetGuids;
+            }
+
+        }
+
+        private IEnumerable<ulong> ReadRaidMemberGuids(nint party)
+        {
+            List<ulong> raidMemberGuids = [];
 
             for (int i = 0; i < 40; i++)
             {
                 if (Memory.Read(nint.Add(party, i * 4), out nint player) && player != nint.Zero
                     && Memory.Read(nint.Add(player, 0x10), out ulong guid) && guid > 0)
                 {
-                    partymemberGuids.Add(guid);
+                    raidMemberGuids.Add(guid);
 
                     if (Memory.Read(nint.Add(player, 0x4), out int status) && status == 2)
                     {
-                        PartyleaderGuid = guid;
+                        PartyLeaderGuid = guid;
                     }
                 }
             }
 
-            return partymemberGuids.Where(e => e != 0 && e != PlayerGuid).Distinct();
+            return raidMemberGuids.Where(e => e != 0 && e != PlayerGuid).Distinct();
         }
 
-        private bool ReadPartyPointer(out nint party)
+        private bool ReadLeaderGuid(out nint party)
         {
             return Memory.Read(Memory.Offsets.PartyLeader, out party) && party != nint.Zero;
         }

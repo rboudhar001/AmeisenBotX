@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Managers.Threat
             (
                 e => e.Type == WowObjectType.Player
                 && !e.IsDead
-                && Bot.Wow.GetReaction(e.BaseAddress, Bot.Player.BaseAddress) == WowUnitReaction.Hostile
+                && Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Hostile
                 && e.DistanceTo(position) < 60.0f
             );
 
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Managers.Threat
             (
                 e => e.Type == WowObjectType.Unit
                 && !e.IsDead
-                && Bot.Wow.GetReaction(e.BaseAddress, Bot.Player.BaseAddress) == WowUnitReaction.Hostile
+                && Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Hostile
                 && e.DistanceTo(position) < 50.0f
             );
 

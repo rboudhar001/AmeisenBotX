@@ -3,6 +3,8 @@
     public enum HealSpellType
     {
         SingleTarget,
-        MultiTarget
+        SingleTargetBuff,
+        MultiTarget,
+        MultiTargetBuff
     }
 }

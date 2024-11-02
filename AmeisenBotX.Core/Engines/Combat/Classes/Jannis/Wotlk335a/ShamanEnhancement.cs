@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class ShamanEnhancement : BasicCombatClass
     {
-        public ShamanEnhancement(AmeisenBotInterfaces bot) : base(bot)
+        public ShamanEnhancement(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () => Bot.Player.ManaPercentage > 60.0 && TryCastSpell(Shaman335a.LightningShield, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () => Bot.Player.ManaPercentage < 20.0 && TryCastSpell(Shaman335a.WaterShield, 0, true)));
@@ -135,7 +135,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.OutOfCombatExecute();
 
-            if (HandleDeadPartymembers(Shaman335a.AncestralSpirit))
+            if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
             {
                 return;
             }

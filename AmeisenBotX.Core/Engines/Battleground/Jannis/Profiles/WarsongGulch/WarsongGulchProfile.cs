@@ -14,24 +14,43 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
+namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles.WarsongGulch
 {
-    public class WarsongGulchProfile : IBattlegroundProfile
+    public class WarsongGulchProfile : BattlegroundProfile
     {
-        private static readonly JsonSerializerOptions Options = new()
-        {
-            AllowTrailingCommas = true,
-            NumberHandling = JsonNumberHandling.AllowReadingFromString
-        };
 
         public WarsongGulchProfile(AmeisenBotInterfaces bot)
         {
             Bot = bot;
 
+            if (Bot.Player.IsAlliance())
+            {
+                EnemyBasePosition = new(916, 1434, 346);
+                EnemyBasePositionMapCoords = new(53, 90, 0);
+                EnemyGraveyardPosition = new(1415, 1555, 343);
+                FlagHidingSpot = new(1519, 1467, 374);
+                GatePosition = new(1494, 1457 + (float)(new Random().NextDouble() * 16.0f - 8.0f), 343);
+                OwnBasePosition = new(1539, 1481, 352);
+                OwnBasePositionMapCoords = new(49, 15, 0);
+                OwnGraveyardPosition = new(1029, 1387, 340);
+            }
+            else
+            {
+                EnemyBasePosition = new(1539, 1481, 352);
+                EnemyBasePositionMapCoords = new(49, 15, 0);
+                EnemyGraveyardPosition = new(1029, 1387, 340);
+                FlagHidingSpot = new(949, 1449, 367);
+                GatePosition = new(951, 1459 + (float)(new Random().NextDouble() * 16.0f - 8.0f), 342);
+                OwnBasePosition = new(916, 1434, 346);
+                OwnBasePositionMapCoords = new(53, 90, 0);
+                OwnGraveyardPosition = new(1415, 1555, 343);
+            }
+
             ActionEvent = new(TimeSpan.FromMilliseconds(500));
             LosCheckEvent = new(TimeSpan.FromMilliseconds(1000));
 
-            JBgBlackboard = new(UpdateBattlegroundInfo);
+            var ctfBlackboard = new CtfBlackboard(UpdateBattlegroundInfo);
+            Blackboard = ctfBlackboard;
 
             KillEnemyFlagCarrierSelector = new
             (
@@ -103,60 +122,62 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             MainSelector = new Selector<CtfBlackboard>
             (
-                (b) => IsGateOpen(),
-                 new Selector<CtfBlackboard>
-                 (
-                     (b) => IsFlagNear(),
-                     new Leaf<CtfBlackboard>(UseNearestFlag),
-                     new Selector<CtfBlackboard>
-                     (
-                         (b) => IsAnyBuffNearMeAndNoOneElseUsingIt(16.0f),
-                         new Leaf<CtfBlackboard>(MoveToNearestBuff),
-                         new Selector<CtfBlackboard>
-                         (
-                             (b) => DoWeOutnumberOurEnemies(b),
-                             new Leaf<CtfBlackboard>(AttackNearWeakestEnemy),
-                             FlagSelector
-                         )
-                     )
-                 ),
-                 new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.GatePosition))
+                (b) => Bot.Player.IsDead,
+                new Leaf<CtfBlackboard>(Dead),
+                new Selector<CtfBlackboard>
+                (
+                    (b) => IsGateOpen(),
+                    new Selector<CtfBlackboard>
+                    (
+                        (b) => IsFlagNear(),
+                        new Leaf<CtfBlackboard>(UseNearestFlag),
+                        new Selector<CtfBlackboard>
+                        (
+                            (b) => IsAnyBuffNearMeAndNoOneElseUsingIt(16.0f),
+                            new Leaf<CtfBlackboard>(MoveToNearestBuff),
+                            new Selector<CtfBlackboard>
+                            (
+                                (b) => DoWeOutnumberOurEnemies(b),
+                                new Leaf<CtfBlackboard>(AttackNearWeakestEnemy),
+                                FlagSelector
+                            )
+                        )
+                    ),
+                    new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.GatePosition))
+                 )
             );
 
             BehaviorTree = new
             (
                 MainSelector,
-                JBgBlackboard,
+                ctfBlackboard,
                 TimeSpan.FromSeconds(1)
             );
         }
 
-        private interface IWsgDataset
-        {
-            static readonly List<int> BuffDisplayIds = [5991, 5995, 5931];
+        public override Vector3 EnemyBasePosition { get; }
 
-            Vector3 EnemyBasePosition { get; }
+        public Vector3 EnemyBasePositionMapCoords { get; }
 
-            Vector3 EnemyBasePositionMapCoords { get; }
+        public override Vector3 EnemyGraveyardPosition { get; }
 
-            Vector3 EnemyGraveyardPosition { get; }
+        public Vector3 FlagHidingSpot { get; }
 
-            Vector3 FlagHidingSpot { get; }
+        public override Vector3 GatePosition { get; }
 
-            Vector3 GatePosition { get; }
+        public override Vector3 OwnBasePosition { get; }
 
-            Vector3 OwnBasePosition { get; }
+        public Vector3 OwnBasePositionMapCoords { get; }
 
-            Vector3 OwnBasePositionMapCoords { get; }
-
-            Vector3 OwnGraveyardPosition { get; }
-        }
+        public override Vector3 OwnGraveyardPosition { get; }
 
         public BehaviorTree<CtfBlackboard> BehaviorTree { get; }
 
         public DualSelector<CtfBlackboard> FlagSelector { get; }
 
-        public CtfBlackboard JBgBlackboard { get; set; }
+        public override Blackboard Blackboard { get; }
+
+        private CtfBlackboard CtfBlackboard => (CtfBlackboard)Blackboard; // Strongly-typed property
 
         public Selector<CtfBlackboard> MainSelector { get; }
 
@@ -172,7 +193,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private IWsgDataset WsgDataset { get; set; }
 
-        public void Execute()
+        public override void Execute()
         {
             WsgDataset ??= Bot.Player.IsAlliance() ? new AllianceWsgDataset() : new HordeWsgDataset();
 
@@ -192,7 +213,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
 
             // check whether i'm part of the closest x (memberCount) members to the flag carrier
-            int index = Bot.Objects.Partymembers.OfType<IWowPlayer>()
+            int index = Bot.Objects.PartyMembers.OfType<IWowPlayer>()
                             .Where(e => e.Guid != blackboard.MyTeamFlagCarrier.Guid)
                             .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .Select((player, id) => new { Player = player, Index = id })
@@ -287,7 +308,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private bool IsFlagNear()
         {
-            return JBgBlackboard.NearFlags != null && JBgBlackboard.NearFlags.Any(e => e.Position.GetDistance(Bot.Player.Position) < 8.0);
+            return CtfBlackboard.NearFlags != null && CtfBlackboard.NearFlags.Any(e => e.Position.GetDistance(Bot.Player.Position) < 8.0);
         }
 
         private bool IsGateOpen()
@@ -310,20 +331,27 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BtStatus KillEnemyFlagCarrier(CtfBlackboard blackboard)
         {
-            if (JBgBlackboard.EnemyTeamFlagCarrier == null)
+            if (CtfBlackboard.EnemyTeamFlagCarrier == null)
             {
                 return BtStatus.Failed;
             }
 
-            InitiateCombat(JBgBlackboard.EnemyTeamFlagCarrier);
+            InitiateCombat(CtfBlackboard.EnemyTeamFlagCarrier);
             return BtStatus.Ongoing;
         }
 
         private BtStatus MoveToEnemyBaseAndGetFlag(CtfBlackboard blackboard)
         {
-            return !CommonRoutines.MoveToTarget(Bot, WsgDataset.EnemyBasePosition, 2.0f) && JBgBlackboard.NearFlags != null
+            return !CommonRoutines.MoveToTarget(Bot, WsgDataset.EnemyBasePosition, 2.0f) && CtfBlackboard.NearFlags != null
                 ? UseNearestFlag(blackboard)
                 : BtStatus.Ongoing;
+        }
+
+        private BtStatus Dead(CtfBlackboard blackboard)
+        {
+            Bot.Wow.RepopMe();
+            Bot.Movement.StopMovement();
+            return BtStatus.Success;
         }
 
         private BtStatus MoveToNearestBuff(CtfBlackboard blackboard)
@@ -335,14 +363,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BtStatus MoveToOwnFlagCarrierAndHelp()
         {
-            if (JBgBlackboard.MyTeamFlagCarrier == null)
+            if (CtfBlackboard.MyTeamFlagCarrier == null)
             {
                 return BtStatus.Failed;
             }
 
-            if (!CommonRoutines.MoveToTarget(Bot, JBgBlackboard.MyTeamFlagCarrier.Position, 5.0f))
+            if (!CommonRoutines.MoveToTarget(Bot, CtfBlackboard.MyTeamFlagCarrier.Position, 5.0f))
             {
-                IWowUnit nearEnemy = Bot.GetNearEnemies<IWowUnit>(JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
+                IWowUnit nearEnemy = Bot.GetNearEnemies<IWowUnit>(CtfBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
@@ -369,7 +397,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                 float zDiff = position.Z - Bot.Player.Position.Z;
 
-                MovementAction action = (zDiff < -4.0 && InLos)
+                MovementAction action = zDiff < -4.0 && InLos
                     || Bot.Player.DistanceTo(WsgDataset.OwnGraveyardPosition) < 24.0f
                     || Bot.Player.DistanceTo(WsgDataset.EnemyGraveyardPosition) < 24.0f
                         ? MovementAction.DirectMove
@@ -402,40 +430,40 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                     if (Bot.Player.IsAlliance())
                     {
-                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0]);
-                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1]);
+                        CtfBlackboard.MyTeamScore = int.Parse(splittedScoreA[0]);
+                        CtfBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1]);
 
-                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0]);
-                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1]);
+                        CtfBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0]);
+                        CtfBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1]);
 
-                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState["allianceState"]) == 2;
-                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState["hordeState"]) == 2;
+                        CtfBlackboard.MyTeamHasFlag = int.Parse((string)bgState["allianceState"]) == 2;
+                        CtfBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState["hordeState"]) == 2;
 
-                        JBgBlackboard.MyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
-                        JBgBlackboard.EnemyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
+                        CtfBlackboard.MyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
+                        CtfBlackboard.EnemyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
 
-                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
-                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        CtfBlackboard.MyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        CtfBlackboard.EnemyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
                     }
                     else
                     {
-                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0]);
-                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1]);
+                        CtfBlackboard.MyTeamScore = int.Parse(splittedScoreH[0]);
+                        CtfBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1]);
 
-                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0]);
-                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1]);
+                        CtfBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0]);
+                        CtfBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1]);
 
-                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState["hordeState"]) == 2;
-                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState["allianceState"]) == 2;
+                        CtfBlackboard.MyTeamHasFlag = int.Parse((string)bgState["hordeState"]) == 2;
+                        CtfBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState["allianceState"]) == 2;
 
-                        JBgBlackboard.MyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
-                        JBgBlackboard.EnemyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
+                        CtfBlackboard.MyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
+                        CtfBlackboard.EnemyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
 
-                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
-                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        CtfBlackboard.MyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        CtfBlackboard.EnemyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
                     }
 
-                    JBgBlackboard.NearFlags = Bot.Objects.All.OfType<IWowGameobject>()
+                    CtfBlackboard.NearFlags = Bot.Objects.All.OfType<IWowGameobject>()
                                                  .Where(e => e.DisplayId is ((int)WowGameObjectDisplayId.WsgAllianceFlag)
                                                           or ((int)WowGameObjectDisplayId.WsgHordeFlag));
                 }
@@ -445,7 +473,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BtStatus UseNearestFlag(CtfBlackboard blackboard)
         {
-            IWowGameobject nearestFlag = JBgBlackboard.NearFlags.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
+            IWowGameobject nearestFlag = CtfBlackboard.NearFlags.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
 
             if (nearestFlag != null)
             {
@@ -461,6 +489,27 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return BtStatus.Failed;
         }
 
+        private interface IWsgDataset
+        {
+            static readonly List<int> BuffDisplayIds = [5991, 5995, 5931];
+
+            Vector3 EnemyBasePosition { get; }
+
+            Vector3 EnemyBasePositionMapCoords { get; }
+
+            Vector3 EnemyGraveyardPosition { get; }
+
+            Vector3 FlagHidingSpot { get; }
+
+            Vector3 GatePosition { get; }
+
+            Vector3 OwnBasePosition { get; }
+
+            Vector3 OwnBasePositionMapCoords { get; }
+
+            Vector3 OwnGraveyardPosition { get; }
+        }
+
         private class AllianceWsgDataset : IWsgDataset
         {
             public Vector3 EnemyBasePosition { get; } = new(916, 1434, 346);
@@ -471,7 +520,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             public Vector3 FlagHidingSpot { get; } = new(1519, 1467, 374);
 
-            public Vector3 GatePosition { get; } = new(1494, 1457 + (float)((new Random().NextDouble() * 16.0f) - 8.0f), 343);
+            public Vector3 GatePosition { get; } = new(1494, 1457 + (float)(new Random().NextDouble() * 16.0f - 8.0f), 343);
 
             public Vector3 OwnBasePosition { get; } = new(1539, 1481, 352);
 
@@ -490,7 +539,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             public Vector3 FlagHidingSpot { get; } = new(949, 1449, 367);
 
-            public Vector3 GatePosition { get; private set; } = new(951, 1459 + (float)((new Random().NextDouble() * 16.0f) - 8.0f), 342);
+            public Vector3 GatePosition { get; private set; } = new(951, 1459 + (float)(new Random().NextDouble() * 16.0f - 8.0f), 342);
 
             public Vector3 OwnBasePosition { get; } = new(916, 1434, 346);
 

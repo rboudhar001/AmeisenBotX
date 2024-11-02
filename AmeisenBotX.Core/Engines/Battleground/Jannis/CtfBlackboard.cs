@@ -1,12 +1,11 @@
-﻿using AmeisenBotX.BehaviorTree.Interfaces;
-using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 {
-    public class CtfBlackboard(Action updateAction) : IBlackboard
+    public class CtfBlackboard : Blackboard
     {
         public IWowUnit EnemyTeamFlagCarrier { get; set; }
 
@@ -14,9 +13,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         public bool EnemyTeamHasFlag { get; set; }
 
-        public int EnemyTeamMaxScore { get; set; }
+        public override int EnemyTeamMaxScore { get; set; }
 
-        public int EnemyTeamScore { get; set; }
+        public override int EnemyTeamScore { get; set; }
 
         public IWowUnit MyTeamFlagCarrier { get; set; }
 
@@ -24,17 +23,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         public bool MyTeamHasFlag { get; set; }
 
-        public int MyTeamMaxScore { get; set; }
+        public override int MyTeamMaxScore { get; set; }
 
-        public int MyTeamScore { get; set; }
+        public override int MyTeamScore { get; set; }
 
         public IEnumerable<IWowGameobject> NearFlags { get; set; }
 
-        private Action UpdateAction { get; } = updateAction;
-
-        public void Update()
+        public CtfBlackboard(Action updateAction) : base(updateAction)
         {
-            UpdateAction();
         }
     }
 }

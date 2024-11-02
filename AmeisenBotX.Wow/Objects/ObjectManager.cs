@@ -62,23 +62,50 @@ namespace AmeisenBotX.Wow.Objects
         ///<inheritdoc cref="IObjectProvider.ObjectCount"/>
         public int ObjectCount { get; protected set; }
 
-        ///<inheritdoc cref="IObjectProvider.Partyleader"/>
-        public IWowUnit Partyleader { get; protected set; }
+        ///<inheritdoc cref="IObjectProvider.PartyLeader"/>
+        public IWowUnit PartyLeader { get; protected set; }
 
-        ///<inheritdoc cref="IObjectProvider.PartyleaderGuid"/>
-        public ulong PartyleaderGuid { get; protected set; }
+        ///<inheritdoc cref="IObjectProvider.PartyLeaderGuid"/>
+        public ulong PartyLeaderGuid { get; protected set; }
 
-        ///<inheritdoc cref="IObjectProvider.PartymemberGuids"/>
-        public IEnumerable<ulong> PartymemberGuids { get; protected set; } = new List<ulong>();
+        // group
+        ///<inheritdoc cref="IObjectProvider.GroupMembers"/>
+        public IEnumerable<IWowUnit> GroupMembers { get; protected set; } = new List<IWowUnit>();
 
-        ///<inheritdoc cref="IObjectProvider.Partymembers"/>
-        public IEnumerable<IWowUnit> Partymembers { get; protected set; } = new List<IWowUnit>();
+        ///<inheritdoc cref="IObjectProvider.GroupMemberGuids"/>
+        public IEnumerable<ulong> GroupMemberGuids { get; protected set; } = new List<ulong>();
 
-        ///<inheritdoc cref="IObjectProvider.PartyPetGuids"/>
-        public IEnumerable<ulong> PartyPetGuids { get; protected set; } = new List<ulong>();
+        ///<inheritdoc cref="IObjectProvider.GroupPets"/>
+        public IEnumerable<IWowUnit> GroupPets { get; protected set; } = new List<IWowUnit>();
+
+        ///<inheritdoc cref="IObjectProvider.GroupPetGuids"/>
+        public IEnumerable<ulong> GroupPetGuids { get; protected set; } = new List<ulong>();
+
+        // raid
+        ///<inheritdoc cref="IObjectProvider.RaidMembers"/>
+        public IEnumerable<IWowUnit> RaidMembers { get; protected set; } = new List<IWowUnit>();
+
+        ///<inheritdoc cref="IObjectProvider.RaidMemberGuids"/>
+        public IEnumerable<ulong> RaidMemberGuids { get; protected set; } = new List<ulong>();
+
+        ///<inheritdoc cref="IObjectProvider.RaidPets"/>
+        public IEnumerable<IWowUnit> RaidPets { get; protected set; } = new List<IWowUnit>();
+
+        ///<inheritdoc cref="IObjectProvider.RaidPetGuids"/>
+        public IEnumerable<ulong> RaidPetGuids { get; protected set; } = new List<ulong>();
+
+        // party
+        ///<inheritdoc cref="IObjectProvider.PartyMembers"/>
+        public IEnumerable<IWowUnit> PartyMembers { get; protected set; } = new List<IWowUnit>();
+
+        ///<inheritdoc cref="IObjectProvider.PartyMemberGuids"/>
+        public IEnumerable<ulong> PartyMemberGuids { get; protected set; } = new List<ulong>();
 
         ///<inheritdoc cref="IObjectProvider.PartyPets"/>
         public IEnumerable<IWowUnit> PartyPets { get; protected set; } = new List<IWowUnit>();
+
+        ///<inheritdoc cref="IObjectProvider.PartyPetGuids"/>
+        public IEnumerable<ulong> PartyPetGuids { get; protected set; } = new List<ulong>();
 
         ///<inheritdoc cref="IObjectProvider.Pet"/>
         public IWowUnit Pet { get; protected set; }
@@ -178,7 +205,7 @@ namespace AmeisenBotX.Wow.Objects
                 if (TargetGuid == 0) { Target = null; }
                 if (PetGuid == 0) { Pet = null; }
                 if (LastTargetGuid == 0) { LastTarget = null; }
-                if (PartyleaderGuid == 0) { Partyleader = null; }
+                if (PartyLeaderGuid == 0) { PartyLeader = null; }
 
                 Memory.Read(Memory.Offsets.ClientConnection, out nint clientConnection);
                 Memory.Read(nint.Add(clientConnection, (int)Memory.Offsets.CurrentObjectManager), out nint currentObjectManager);
@@ -208,13 +235,20 @@ namespace AmeisenBotX.Wow.Objects
                     }
                 }
 
-                // read the party/raid leaders guid and if there is one, the group too
-                ReadParty();
+                ReadGroup();
+
+                ReadRaid();
+
+                ReadParty(); // if there is raid then party is raid, if not party is group
 
                 All = wowObjects[0..ObjectCount];
                 OnObjectUpdateComplete?.Invoke(All);
             }
         }
+
+        protected abstract void ReadGroup();
+
+        protected abstract void ReadRaid();
 
         protected abstract void ReadParty();
 
@@ -279,7 +313,7 @@ namespace AmeisenBotX.Wow.Objects
 
                         if (wowObjects[i].Guid == TargetGuid) { Target = (TUnit)wowObjects[i]; }
                         if (wowObjects[i].Guid == LastTargetGuid) { LastTarget = (TUnit)wowObjects[i]; }
-                        if (wowObjects[i].Guid == PartyleaderGuid) { Partyleader = (TUnit)wowObjects[i]; }
+                        if (wowObjects[i].Guid == PartyLeaderGuid) { PartyLeader = (TUnit)wowObjects[i]; }
                         if (wowObjects[i].Guid == PetGuid) { Pet = (TUnit)wowObjects[i]; }
                     }
                 }

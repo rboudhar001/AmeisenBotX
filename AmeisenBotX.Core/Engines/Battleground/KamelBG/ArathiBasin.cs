@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -18,6 +19,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         public List<Flags> FlagsNodelist { get; set; } = [];
 
         public string Name => "Arathi Basin";
+
+        public IBattlegroundProfile Profile { get; set; }
 
         public List<Vector3> Path { get; } =
         [

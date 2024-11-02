@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 SearchAreas.NotifyDetour();
                 Bot.CombatClass.AttackTarget();
             }
-            else if (Bot.Player.Position.GetDistance(CurrentSpot) < 3.0f || SearchAreas.HasAbortedPath() || Bot.Movement.Status == MovementAction.None)
+            else if (Bot.Player.Position.GetDistance(CurrentSpot) < 3.0f || SearchAreas.HasAbortedPath() || Bot.Movement.CurrentMovementAction == MovementAction.None)
             {
                 CurrentSpot = SearchAreas.GetNextPosition(Bot);
                 Bot.Movement.SetMovementAction(MovementAction.Move, CurrentSpot);
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             IWowUnit wowUnit = Bot.GetWowObjectByGuid<IWowUnit>(npcGuid);
 
             if (wowUnit != null
-                && (Bot.Player.Guid == sourceGuid || Bot.Objects.PartymemberGuids.Contains(sourceGuid))
+                && (Bot.Player.Guid == sourceGuid || Bot.Objects.PartyMemberGuids.Contains(sourceGuid))
                 && NpcIds.Contains(BotUtils.GuidToNpcId(npcGuid)))
             {
                 ++Killed;

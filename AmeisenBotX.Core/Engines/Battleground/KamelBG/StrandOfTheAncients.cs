@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -18,6 +19,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         public string Description => "Strand of the Ancients";
 
         public string Name => "Strand of the Ancients";
+
+        public IBattlegroundProfile Profile { get; set; }
 
         public List<Vector3> PathRight { get; } =
         [

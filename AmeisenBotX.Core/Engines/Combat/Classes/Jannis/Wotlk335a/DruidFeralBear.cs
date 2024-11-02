@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class DruidFeralBear : BasicCombatClass
     {
-        public DruidFeralBear(AmeisenBotInterfaces bot) : base(bot)
+        public DruidFeralBear(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.MarkOfTheWild, () => TryCastSpell(Druid335a.MarkOfTheWild, Bot.Wow.PlayerGuid, true, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.DireBearForm, () => TryCastSpell(Druid335a.DireBearForm, 0, true)));

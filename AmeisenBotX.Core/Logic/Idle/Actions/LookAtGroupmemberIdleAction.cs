@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public bool Enter()
         {
-            NearPartymembersFacingMe = Bot.Objects.Partymembers.Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Position.GetDistance(Bot.Player.Position) < 12.0f && BotMath.IsFacing(e.Position, e.Rotation, Bot.Player.Position));
+            NearPartymembersFacingMe = Bot.Objects.PartyMembers.Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Position.GetDistance(Bot.Player.Position) < 12.0f && BotMath.IsFacing(e.Position, e.Rotation, Bot.Player.Position));
             return NearPartymembersFacingMe.Any();
         }
 

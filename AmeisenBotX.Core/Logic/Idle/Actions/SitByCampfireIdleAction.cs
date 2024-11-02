@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
             IWowGameobject nearCampfire = Bot.Objects.All.OfType<IWowGameobject>()
                 .FirstOrDefault(e => e.DisplayId == (int)WowGameObjectDisplayId.CookingCampfire
-                                  && Bot.Objects.PartymemberGuids.Contains(e.CreatedBy));
+                                  && Bot.Objects.PartyMemberGuids.Contains(e.CreatedBy));
 
             if (nearCampfire != null && !SatDown)
             {

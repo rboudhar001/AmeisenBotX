@@ -122,6 +122,7 @@ namespace AmeisenBotX
                 Config.BattlegroundUsePartyMode = checkboxBattlegroundUsePartyMode.IsChecked.GetValueOrDefault(false);
                 Config.BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty;
                 Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text, CultureInfo.InvariantCulture);
+                Config.CreatePath = checkboxCreatePath.IsChecked.GetValueOrDefault(false);
                 Config.CustomCombatClassFile = textboxCombatClassFile.Text;
                 Config.DrinkStartPercent = sliderDrinkStart.Value;
                 Config.DrinkUntilPercent = sliderDrinkUntil.Value;
@@ -181,6 +182,8 @@ namespace AmeisenBotX
                 Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text, CultureInfo.InvariantCulture);
                 Config.StayCloseToGroupInCombat = checkboxStayCloseToGroupInCombat.IsChecked.GetValueOrDefault(false);
                 Config.SupportRange = (float)sliderAssistRange.Value;
+                Config.FightUntilHealth = (int)MathF.Round((float)sliderFightUntilHealth.Value);
+                Config.FightUntilMana = (int)MathF.Round((float)sliderFightUntilMana.Value);
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
                 Config.UseMounts = checkboxUseMounts.IsChecked.GetValueOrDefault(false);
                 Config.UseMountsInParty = checkboxUseMountsInParty.IsChecked.GetValueOrDefault(false);
@@ -191,9 +194,9 @@ namespace AmeisenBotX
                 Config.MovementSettings.MaxSteering = (float)sliderMaxSteeringNormal.Value / 10.0f;
                 Config.MovementSettings.MaxSteeringCombat = (float)sliderMaxSteeringCombat.Value / 10.0f;
                 Config.MovementSettings.MaxVelocity = (float)sliderMaxVelocity.Value / 10.0f;
-                Config.MovementSettings.WaypointCheckThresholdMounted = sliderWaypointThresholdMount.Value;
+                Config.MovementSettings.WaypointCheckThresholdMounted = (float)sliderWaypointThresholdMount.Value;
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
-                Config.MovementSettings.WaypointCheckThreshold = sliderWaypointThreshold.Value;
+                Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
 
                 if (Enum.TryParse(comboboxStartStopBotBindingAltKey.Text.ToString(), out KeyCode mod)
                     && Enum.TryParse(comboboxStartStopBotBindingKey.Text.ToString(), out KeyCode key))
@@ -469,7 +472,10 @@ namespace AmeisenBotX
             checkboxUseMountsInParty.IsChecked = Config.UseMountsInParty;
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
             comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
+            checkboxCreatePath.IsChecked = Config.CreatePath;
             sliderAssistRange.Value = Config.SupportRange;
+            sliderFightUntilHealth.Value = Config.FightUntilHealth;
+            sliderFightUntilMana.Value = Config.FightUntilMana;
             sliderDrinkStart.Value = Config.DrinkStartPercent;
             sliderDrinkUntil.Value = Config.DrinkUntilPercent;
             sliderEatDrinkPartyFollowAbort.Value = Config.EatDrinkAbortFollowPartyDistance;
@@ -561,6 +567,24 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelGroupAssistRange.Content = $"Assist Range (m): {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderFightUntilHealth_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelFightUntilHealth.Content = $"Fight Until (health): {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderFightUntilMana_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelFightUntilMana.Content = $"Fight Until (mana): {Math.Round(e.NewValue)} %";
                 ChangedSomething = true;
             }
         }

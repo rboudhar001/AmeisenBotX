@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class ShamanRestoration : BasicCombatClass
     {
-        public ShamanRestoration(AmeisenBotInterfaces bot) : base(bot)
+        public ShamanRestoration(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () => TryCastSpell(Shaman335a.WaterShield, 0, true)));
 
@@ -109,7 +109,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.OutOfCombatExecute();
 
-            if (HandleDeadPartymembers(Shaman335a.AncestralSpirit))
+            if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
             {
                 return;
             }

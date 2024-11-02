@@ -58,10 +58,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         //Spells / dmg
         private const string SmiteSpell = "Smite";
 
-        public PriestHoly(AmeisenBotInterfaces bot) : base()
+        public PriestHoly(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
-
             //Spells Race
             //spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
 
@@ -175,7 +173,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<IWowUnit> CastBuff = new(Bot.Objects.Partymembers)
+                List<IWowUnit> CastBuff = new(Bot.Objects.PartyMembers)
                 {
                     Bot.Player
                 };
@@ -271,9 +269,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private void StartHeal()
         {
-            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.Partymembers)
+            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.RaidMembers)
             {
-                //healableUnits.AddRange(Bot.ObjectManager.PartyPets);
+                //healableUnits.AddRange(Bot.ObjectManager.RaidPets);
                 Bot.Player
             };
 
@@ -295,7 +293,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         {
                             return;
                         }
-                        if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
+                        if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None)
                         {
                             Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();
@@ -391,7 +389,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         {
                             return;
                         }
-                        if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
+                        if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None)
                         {
                             Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();

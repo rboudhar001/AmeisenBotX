@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public class WarrirorFurry : BasicCombatClassBia10
     {
-        public WarrirorFurry(AmeisenBotInterfaces bot) : base(bot)
+        public WarrirorFurry(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.BattleShout, () =>
                 Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != Warrior335a.BattleShout)

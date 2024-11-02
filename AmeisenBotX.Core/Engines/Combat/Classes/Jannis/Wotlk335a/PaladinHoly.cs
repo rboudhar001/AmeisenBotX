@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
     public class PaladinHoly : BasicCombatClass
     {
-        public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
+        public PaladinHoly(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             Configurables.TryAdd("AttackInGroups", true);
             Configurables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
@@ -170,7 +170,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 }
                 else
                 {
-                    IEnumerable<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => e != null && !e.IsDead).OrderBy(e => e.HealthPercentage);
+                    IEnumerable<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.PartyMembers.Where(e => e != null && !e.IsDead).OrderBy(e => e.HealthPercentage);
 
                     if (healableTargets.Count() > 1)
                     {
@@ -194,7 +194,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
             }
             else
             {
-                bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
+                bool isAlone = !Bot.Objects.RaidMembers.Any(e => e.Guid != Bot.Player.Guid);
 
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && TryFindTarget(TargetProviderDps, out _))

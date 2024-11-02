@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
@@ -12,9 +13,10 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 {
-    public class WarriorFury(AmeisenBotInterfaces bot) : ICombatClass
+    public class WarriorFury(AmeisenBotInterfaces bot, AmeisenBotConfig config) : ICombatClass
     {
         private readonly AmeisenBotInterfaces Bot = bot;
+        private readonly AmeisenBotConfig Config = config;
         private readonly string[] runningEmotes = ["/train", "/cackle", "/silly"];
         private readonly WarriorFurySpells spells = new(bot);
         private readonly string[] standingEmotes = ["/shimmy", "/dance", "/twiddle", "/highfive"];
@@ -82,6 +84,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             Tree3 = []
         };
 
+        public ITargetProvider TargetProviderDps { get; set; }
+
+        public ITargetProvider TargetProviderHeal { get; set; }
+
+        public ITargetProvider TargetProviderTank { get; set; }
+
         public string Version => "1.0";
 
         public bool WalkBehindEnemy => false;
@@ -93,6 +101,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private Vector3 LastPlayerPosition { get; set; }
 
         private Vector3 LastTargetPosition { get; set; }
+
+        public virtual bool TryToTravel()
+        {
+            return false;
+        }
 
         public void AttackTarget()
         {
@@ -177,7 +190,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = Bot.Objects.Partyleader.Guid;
+                ulong leaderGuid = Bot.Objects.PartyLeader.Guid;
                 IWowUnit target = Bot.Target;
                 IWowUnit leader = null;
                 if (leaderGuid != 0)
@@ -247,7 +260,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 return;
             }
 
-            if (Bot.Movement.Status != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (Bot.Player.CombatReach + target.CombatReach))
+            if (Bot.Movement.CurrentMovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (Bot.Player.CombatReach + target.CombatReach))
             {
                 Bot.Movement.StopMovement();
             }

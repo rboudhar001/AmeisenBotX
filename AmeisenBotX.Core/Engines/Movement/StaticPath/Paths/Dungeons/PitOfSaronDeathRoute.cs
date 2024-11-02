@@ -1,13 +1,14 @@
 ﻿using AmeisenBotX.Common.Math;
 using System.Collections.Generic;
+using AmeisenBotX.Wow.Objects.Enums;
 
-namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
+namespace AmeisenBotX.Core.Engines.Movement.StaticPath.Paths.Dungeons
 {
-    public class PitOfSaronDeathRoute : StaticPathDeathRoute
+    public class PitOfSaronDeathRoute : StaticPath
     {
-        protected override Vector3 DeathPoint { get; } = new(5592, 2010, 514);
+        public override WowMapId MapId { get; } = WowMapId.PitOfSaron;
 
-        protected override List<Vector3> Path { get; } =
+        public override List<Vector3> Path { get; } =
         [
             new(6447, 2061, 564),
             new(6436, 2070, 563),
@@ -90,6 +91,7 @@ namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
             new(5605, 2022, 798),
             new(5596, 2014, 798),
             new(5587, 2005, 798),
+            new(5592, 2010, 798),
         ];
     }
 }

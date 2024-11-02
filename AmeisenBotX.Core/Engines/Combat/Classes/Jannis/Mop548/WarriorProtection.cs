@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 {
     public class WarriorProtection : BasicCombatClass
     {
-        public WarriorProtection(AmeisenBotInterfaces bot) : base(bot)
+        public WarriorProtection(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
             Configurables.TryAdd("FartOnCharge", false);
 
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     if (targetOfTarget != null && targetOfTarget.Guid == Bot.Player.Guid)
                     {
                         // if we have aggro, pull the unit to the best tanking spot
-                        if (Bot.Objects.Partymembers.Any())
+                        if (Bot.Objects.PartyMembers.Any())
                         {
                             Vector3 direction = Bot.Player.Position - Bot.Objects.CenterPartyPosition;
                             direction.Normalize();

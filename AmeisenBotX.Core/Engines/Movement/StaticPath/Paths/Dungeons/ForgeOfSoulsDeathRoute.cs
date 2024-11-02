@@ -1,13 +1,14 @@
 ﻿using AmeisenBotX.Common.Math;
 using System.Collections.Generic;
+using AmeisenBotX.Wow.Objects.Enums;
 
-namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
+namespace AmeisenBotX.Core.Engines.Movement.StaticPath.Paths.Dungeons
 {
-    public class ForgeOfSoulsDeathRoute : StaticPathDeathRoute
+    public class ForgeOfSoulsDeathRoute : StaticPath
     {
-        protected override Vector3 DeathPoint { get; } = new(5670, 2003, -100000);
+        public override WowMapId MapId { get; } = WowMapId.TheForgeOfSouls;
 
-        protected override List<Vector3> Path { get; } =
+        public override List<Vector3> Path { get; } =
         [
             new(6447, 2061, 564),
             new(6446, 2078, 562),
@@ -76,6 +77,7 @@ namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
             new(5664, 2013, 798),
             new(5674, 2000, 798),
             new(5678, 1997, 798),
+            new(5670, 2003, 798),
         ];
     }
 }

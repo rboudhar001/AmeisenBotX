@@ -45,10 +45,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         private const string sealofLightSpell = "Seal of Light";
         private const string sealofWisdomSpell = "Seal of Wisdom";
 
-        public PaladinProtection(AmeisenBotInterfaces bot) : base()
+        public PaladinProtection(AmeisenBotInterfaces bot, AmeisenBotConfig config) : base(bot, config)
         {
-            Bot = bot;
-
             //Spells Race
             //spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
 
@@ -162,7 +160,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<IWowUnit> CastBuff = new(Bot.Objects.Partymembers)
+                List<IWowUnit> CastBuff = new(Bot.Objects.PartyMembers)
                 {
                     Bot.Player
                 };

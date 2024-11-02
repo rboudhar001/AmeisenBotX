@@ -6,6 +6,7 @@
         public const string Bash = "Bash";
         public const string Berserk = "Berserk";
         public const string CatForm = "Cat Form";
+        public const string TravelForm = "Travel Form";
         public const string ChallengingRoar = "Challenging Roar";
         public const string Dash = "Dash";
         public const string DireBearForm = "Dire Bear Form";

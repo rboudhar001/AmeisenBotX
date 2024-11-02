@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
@@ -65,6 +66,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         TalentTree Talents { get; }
 
         /// <summary>
+        /// Set the dps target provider.
+        /// </summary>
+        public ITargetProvider TargetProviderDps { get; set; }
+
+        /// <summary>
+        /// Set  the heal target provider.
+        /// </summary>
+        public ITargetProvider TargetProviderHeal { get; set; }
+
+        /// <summary>
+        /// Set  the tank target provider.
+        /// </summary>
+        public ITargetProvider TargetProviderTank { get; set; }
+
+        /// <summary>
         /// Version of the combat class.
         /// </summary>
         string Version { get; }
@@ -79,6 +95,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         /// For which wow class this combat class is useable.
         /// </summary>
         WowClass WowClass { get; }
+
+        /// <summary>
+        /// Use a skill to move faster (for example `Travel Form` Druid, `Ghost Wolf` Shaman, `Aspect of the Cheetah` Hunter ...)
+        /// </summary>
+        bool TryToTravel();
 
         /// <summary>
         /// Start Attacking the target;
