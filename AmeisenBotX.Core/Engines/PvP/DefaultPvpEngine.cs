@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Engines.PvP
 
         private BtStatus QueueForBattlegrounds()
         {
-            // TODO: fix this function Bot.Wow.LuaQueueBattlegroundByName("Warsong Gulch");
+            // TODO: fix this function: `Bot.Wow.LuaQueueBattlegroundByName("Warsong Gulch");`
             //Bot.Wow.ClickUiElement("BattlegroundType2");
             //Bot.Wow.ClickUiElement("PVPBattlegroundFrameJoinButton");
 

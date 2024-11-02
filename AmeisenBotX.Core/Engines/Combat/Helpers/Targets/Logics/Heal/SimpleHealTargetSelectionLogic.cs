@@ -14,14 +14,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Heal
 
             possibleTargets = healableUnits
                 .Where(e => TargetValidator.IsValid(e)
-                    && !e.IsDead
-                    && e.MaxHealth - e.Health > 1200
-                    && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange
+                            && !e.IsDead
+                            && e.Health < e.MaxHealth
+                            && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange
                 )
-                //.OrderBy(e => e.HealthPercentage);
-                //.OrderByDescending(e => (e.MaxHealth - e.Health));
                 .OrderByDescending(e => e.Type)
-                .ThenByDescending(e => e.MaxHealth - e.Health);
+                .ThenBy(e => e.Health);
 
             return possibleTargets.Any();
         }

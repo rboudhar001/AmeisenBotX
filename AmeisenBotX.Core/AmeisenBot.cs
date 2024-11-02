@@ -633,7 +633,7 @@ namespace AmeisenBotX.Core
                 Bot.Character.Inventory.Update();
                 Bot.Character.Equipment.Update();
 
-                //Bot.Character.UpdateGear();
+                Bot.Character.UpdateGear();
                 Bot.Character.UpdateBags();
 
                 Bot.Character.Inventory.Update();

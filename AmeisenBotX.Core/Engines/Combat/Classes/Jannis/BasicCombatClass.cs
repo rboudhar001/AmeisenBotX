@@ -155,12 +155,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public virtual void Execute()
         {
-            /*
             if (Bot.Target != null && EventCheckFacing.Run())
             {
                 CheckFacing(Bot.Target);
             }
-            */
 
             if (Bot.Player.IsCasting)
             {
@@ -446,7 +444,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     {
                         if (IWowUnit.IsValidAlive(Bot.Target))
                         {
-                            //CheckFacing(Bot.Target);
+                            CheckFacing(Bot.Target);
                             return true;
                         }
                     }
@@ -565,7 +563,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 needToSwitchTargets = false;
             }
             else if (guid == Bot.Target?.Guid)
-            //else if (guid == Bot.Wow.TargetGuid)
             {
                 target = Bot.Target;
                 needToSwitchTargets = false;

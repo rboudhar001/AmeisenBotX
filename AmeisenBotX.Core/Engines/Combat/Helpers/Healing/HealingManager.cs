@@ -162,8 +162,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 if (SpellHealing.ContainsKey(castingSpell))
                 {
                     int missingHealth = target.MaxHealth - target.Health;
-                    int maxAllowedHeal = SpellHealing[castingSpell];
-                    //int maxAllowedHeal = (int)(SpellHealing[castingSpell] * (1.0f + OverhealingStopThreshold));
+                    int maxAllowedHeal = (int)(SpellHealing[castingSpell] * (1.0f + OverhealingStopThreshold));
 
                     // if the cast would be more than x% overheal, stop it
                     if (missingHealth < maxAllowedHeal)
@@ -192,19 +191,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 UpdateSpellHealing();
             }
 
-            List<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.PartyMembers.Where(e =>
-                !e.IsDead
-                && e.HealthPercentage < 90
-                && e.Position.GetDistance(Bot.Player.Position) < 40).ToList();
-
-            //healableTargets.Add(Bot.Player);
+            List<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.PartyMembers.Where(e => !e.IsDead).ToList();
+            healableTargets.Add(Bot.Player);
 
             // is anyone going to die in the next seconds that we could save order by max health to
             // prioritize tanks
-            IEnumerable<IWowUnit> dyingTargets = healableTargets
-                .OrderBy(e => e.MaxHealth)
-                .Where(e => e.HealthPercentage < 20.0
-                            || (IncomingDamage.ContainsKey(e.Guid) && e.Health - (IncomingDamage[e.Guid] * TargetDyingSeconds) <= 0));
+            IEnumerable<IWowUnit> dyingTargets = healableTargets.OrderBy(e => e.MaxHealth)
+                .Where(e => e.HealthPercentage < 20.0 || (IncomingDamage.ContainsKey(e.Guid) && e.Health - (IncomingDamage[e.Guid] * TargetDyingSeconds) <= 0));
 
             if (dyingTargets != null)
             {

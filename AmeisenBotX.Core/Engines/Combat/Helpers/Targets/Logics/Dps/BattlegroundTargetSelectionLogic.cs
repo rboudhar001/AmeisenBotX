@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Dps
                     && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange
                     && Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Hostile
                 )
-                .OrderBy(e => e.HealthPercentage);
+                .OrderBy(e => e.Health);
 
             return possibleTargets.Any();
         }

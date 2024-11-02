@@ -650,7 +650,7 @@ namespace AmeisenBotX.Core.Logic
             {
                 Bot.Wow.StopCasting();
                 Bot.Movement.StopMovement();
-                SavingMyself = Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Battleground.Profile.EnemyGraveyardPosition);
+                SavingMyself = Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Battleground.Profile.OwnGraveyardPosition);
 
                 return SavingMyself ? BtStatus.Success : BtStatus.Failed;
             }
@@ -873,7 +873,7 @@ namespace AmeisenBotX.Core.Logic
         {
             bool needToSaveMyself = Bot.Player.IsInCombat && (Bot.Player.HealthPercentage < Config.FightUntilHealth || Bot.Player.ManaPercentage < Config.FightUntilMana);
 
-            // I don't need to save myself, but I am saving myself
+            // I don't need to save myself but I am saving myself, so stop saving myself
             if (!needToSaveMyself && SavingMyself)
             {
                 Bot.Movement.StopMovement();
@@ -894,14 +894,14 @@ namespace AmeisenBotX.Core.Logic
         {
             if (Bot.Player.IsInCombat) return false;
 
-            // is eating blocked, used to prevent shredding of food
+            // If eating is blocked, used to prevent shredding of food
             /*
             if (!EatBlockEvent.Ready)
             {
                 return false;
             }
 
-            // when we are in a group an they move too far away, abort eating and dont start eating for 30s
+            // when we are in a party and they moved too far away, abort eating and don't start eating for 30s
             if (Config.EatDrinkAbortFollowParty && Bot.Objects.RaidMemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > Config.EatDrinkAbortFollowPartyDistance)
             {
                 EatBlockEvent.Run();
@@ -941,18 +941,14 @@ namespace AmeisenBotX.Core.Logic
                 {
                     Fighting = true;
                 }
-                /*
                 else if (NeedToFightWithPlayer())
                 {
                     Fighting = true;
                 }
-                */
-                /*
                 else if (NeedToFightWithMobs())
                 {
                     Fighting = true;
                 }
-                */
                 else
                 {
                     Fighting = false;
@@ -966,21 +962,21 @@ namespace AmeisenBotX.Core.Logic
         {
             return Bot.Objects.PartyMembers.Any(e =>
                 !e.IsDead
-                && e.MaxHealth - e.Health > 1200
+                && e.Health < e.MaxHealth
                 && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange);
         }
 
         private bool NeedToFightWithPlayer()
         {
-            return Bot.Objects.All.OfType<IWowUnit>().Any(e =>
-                e.IsPlayer()
-                && !e.IsDead
+            return Bot.Objects.All.OfType<IWowPlayer>().Any(e =>
+                !e.IsDead
                 && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange
                 && Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Hostile);
         }
 
         private bool NeedToFightWithMobs()
         {
+            // TODO: Fix this for AlteracValley to be able to target Bosses
             if (Bot.Objects.MapId.IsBattlegroundMap()) { return false; }
 
             if (PartyMembersFightEvent.Run())
